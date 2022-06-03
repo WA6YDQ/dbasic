@@ -15,7 +15,7 @@ to create the BASIC source (and sort the lines per/line number).
 Line numbers are required, all characters (except between double
 quotes "" are lower case. (expect this to change later).
 
-Variables are {a...z} are integer numeric, {a$...z$} are
+Variables {a...z} are integer numeric, {a$...z$} are
 string (max 80 chars).
 
 The following BASIC keywords are valid:
@@ -35,7 +35,7 @@ READ
 RESTORE
 
 There are basic program examples for each keyword. See the
-file *.bas in this repository.
+file *.bas in the examples directory of this repository.
 
 This basic interpreter follows (mostly, exceptions below)
 Dartmouth BASIC described in the book "BASIC 4th Edition"
@@ -52,7 +52,14 @@ In Dartmouth, a statement could be written:
 15LETG=A*E-B*D
 
 Here the keyword LET (as ALL keywords) must have surrounding spaces.
-15 LET G=A*E-B*D
+15 let g=a*e-b*d
+Spaces between elements are also OK:
+30 let g = a  * e  - b  *  d
+
+NOTE: Expressions are NOT algebraic. a+b*c is NOT a+(b*c)
+Evaluation is left to right. Expressions inside parens: a+(b*c) 
+ARE evaluated first, but only the first set in a series.
+(Expect this to change to algebraic order later).
 
 In Dartmouth, the ^ character is used for powers. IE 2^3 would
 be 2*2*2. This version of BASIC uses ** instead of ^, IE 2**3
