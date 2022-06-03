@@ -2,8 +2,17 @@
 
  Statements in this version of BASIC:
  REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
- IF/THEN, FOR/NEXT/STEP, INPUT
- 
+ IF/THEN, FOR/NEXT/STEP, INPUT, READ, DATA,
+ RESTORE, ON/GOTO
+
+ Integer numeric variables are a...z
+ String variables are a$...z$
+
+ All keywords, variables are in lower case.
+ Case is preserved when between double quotes ""
+
+ (C) 2022 Kurt Theis <theis.kurt@gmail.com>
+ This is licensed using the MIT license.
 
 */
 
@@ -27,6 +36,10 @@ int index_end = 0;		// FOR/NEXT end index
 int index_step = 0;		// FOR/NEXT step index
 char index_var;			// FOR/NEXT count variable
 int forlinenumber = 0;	// FOR/NEXT line number to return to
+int *DataStorage;		// DATA statement storage, will assign later
+int DataStorageMax=0;	// max number of data elements
+int DataPosition=0;		// position of read data objects
+
 
 /* extern functions */
 int parse(char *);
@@ -40,6 +53,9 @@ int getstartaddress(int);
 int run_ifthen(char *);
 int run_for(char *);
 int run_next(char *);
+int scanData(char *,int);
+int run_read(char *);
+int run_ongoto(char *);
 
 /* set all vars to 0 */
 int run_clear(void) {
@@ -106,6 +122,20 @@ int parse(char *line) {
 		return 0;
 	}
 
+	if (strcmp(word,"data")==0) {		// ignore data statements (handled elsewhere)
+		return 0;
+	}
+
+	if (strcmp(word,"read")==0) {		// data.c
+		res = run_read(line);
+		return res;
+	}
+
+	if (strcmp(word,"restore")==0) {	// reset data pointer to 0
+		DataPosition = 0;
+		return 0;
+	}
+
 	if (strcmp(word,"let")==0) {		// let.c
 		res = run_let(line);
 		return 0;
@@ -133,6 +163,9 @@ int parse(char *line) {
 	if (strcmp(word,"goto")==0) {		// goto.c
 		return run_goto(line);			// return the line number
 	}
+	if (strcmp(word,"on")==0) {			// goto.c
+		return run_ongoto(line);
+	}
 	if (strcmp(word,"gosub")==0) {		// gosub.c
 		/* save the line number following this line */
 		int i=lineptr, x=0;				// skip current line
@@ -146,7 +179,6 @@ int parse(char *line) {
 		char linen[6];
 		sscanf(tmpline,"%s",linen);		// get line number of next line
 		returnlinenumber = atoi(linen);
-		printf("gosub: returnlinenumber = %d\n",returnlinenumber);
 		return run_gosub(line);			// return the line number
 	}
 	if (strcmp(word,"return")==0) {		// return from subroutine
@@ -262,15 +294,22 @@ int main(int argc, char **argv) {
 	/* 
 	 read each line in the buffer, parse 
 	 the statements, loop until END statement 
-	 is reached.
+	 is reached or an error occurs.
 	 
 	*/
 	
-	//int lineptr=0;		// position in the buffer of the current line
-	int res = 0;		// command return
-	char ln[6];
-
+	int res = 0;		// result, function return value
+	char ln[6];			// line number string placeholder
+	lineptr = 0;		// initialize position in buffer
 	run_clear();		// set numeric vars to 0 at start
+	/* look for data statements, preload memory */
+	res = scanData(buffer,pos);
+	if (res == -1) {	// memory error - fatal
+		free(buffer);
+		exit(1);
+	}
+	DataPosition = 0;	// start at beginning of data list
+
 
 parseLoop:
 	memset(line,0,LINESIZE);
@@ -285,7 +324,7 @@ parseLoop:
 	}
 	line[n]='\0';		// since memset sets all chars to 0, this just removes the \n
 
-	/* extract the current line number */
+	/* extract the current line number (used for error messages) */
 	sscanf(line,"%s",ln);
 	currentlinenumber = atoi(ln);
 	if (currentlinenumber <= 0) {	// error
@@ -300,19 +339,22 @@ parseLoop:
 	if (res == -999) {				// END Statement
 		printf("END statement in line %d\n",currentlinenumber);
 		free(buffer);
+		free(DataStorage);
 		exit (0);
 	}
 	if (res == -1) {				// parse returned an error
 		printf("Error in line %d\n",currentlinenumber);
 		free(buffer);
+		free(DataStorage);
 		exit(0);
 	}
-	if (res > 0) {					// goto/gosub statement run
+	if (res > 0) {					// goto/gosub statement returns new line number
 		/* find the matching line number, set lineptr to start of line */
 		lineptr = getstartaddress(res);
 		if (lineptr == -1) {			// bad line number
 			printf("Line %d - goto/gosub: bad line number %d\n",currentlinenumber,res);
 			free(buffer);
+			free(DataStorage);
 			exit(0);
 		}
 		goto parseLoop;				// continue at new address
@@ -323,16 +365,18 @@ parseLoop:
 	if (lineptr >= pos-1) {		// end of file reached
 		printf("End of file reached\n");
 		free(buffer);
+		free(DataStorage);
 		exit(0);
 	}
 	goto parseLoop;				// continue with basic program
 
 	
-
+	/* all below should never be reached */
 	printf("Unknown error in line %d.\n",currentlinenumber);
 
 	/* done */
 	free(buffer);
+	free(DataStorage);
 	return 0;
 }
 

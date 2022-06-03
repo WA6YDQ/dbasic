@@ -1,7 +1,7 @@
 all	:	basic.o print.o input.o goto.o gosub.o eval.o let.o \
-		ifthen.o fornext.o
+		ifthen.o fornext.o data.o
 	$(CC) -o basic basic.o print.o input.o goto.o gosub.o \
-		eval.o let.o ifthen.o fornext.o $(LIBS)
+		eval.o let.o ifthen.o fornext.o data.o $(LIBS)
 
 LIBS = -lm
 CC = gcc
@@ -36,4 +36,6 @@ ifthen.o	:	ifthen.c
 fornext.o	:	fornext.c
 	cc -c fornext.c
 
+data.o	:	data.c
+	cc -c data.c
 

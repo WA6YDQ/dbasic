@@ -10,7 +10,6 @@ int run_print(char *line) {
 	int eval(char *);
 	char linenumber[6];
 	extern char CharVars[][80];
-	extern int NumericVars[];
 	sscanf(line,"%s",linenumber);
 	//printf("PRINT: %s\n",line);
 	
@@ -62,7 +61,7 @@ int run_print(char *line) {
 		}
 
 
-		/* print a+5, (b*72/c), r/(10+6)/w; */
+		/* examples: print a+5, (b*72/c), r/(10+6)/w; */
 		if (*line == '(' || *line == '-' || (*line >= 'a' && *line <= 'z')) {		// expression starting with a var
 			int n=0;
 			memset(expr,0,sizeof(expr));
@@ -76,7 +75,7 @@ int run_print(char *line) {
 			continue;
 		}
 
-		/* print 10, 35+7, 5*(a+3) */
+		/* examples: print 10, 35+7, 5*(a+3) */
 		if (*line == '(' || *line == '-' || (*line >= '0' && *line <= '9')) {		// expression starting with a number
 			int n=0;
 			memset(expr,0,sizeof(expr));

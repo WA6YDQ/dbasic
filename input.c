@@ -47,6 +47,7 @@ int run_input(char *line) {
 			//printf("input: var is %c\n",strvar);
 			memset(CharVars[strvar-'a'],0,sizeof(CharVars[strvar-'a']));
 			fgets(getline,80,stdin);
+			getline[strlen(getline)-1] = '\0';		// strip off \n
 			strcpy(CharVars[strvar-'a'],getline);
 			line += 2;
 			continue;
