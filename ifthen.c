@@ -17,14 +17,14 @@ int run_ifthen(char *line) {
 	//printf("line is [%s]\n",line);
 	
 	while (isdigit(*line)) line++;		// skip line number
-	while (isspace(*line)) line++;		// and spaces
+	while (isblank(*line)) line++;		// and spaces
 	while (isalpha(*line)) line++;		// and LET statement
 	while (!isalpha(*line)) line++;		// skip spaces until 1st variable
 
 	/* get 1st value for tests */
 	memset(expr,0,sizeof(expr)); n = 0;
 	while (1) {
-		if (isspace(*line)) break;
+		if (isblank(*line)) break;
 		expr[n] = *line;
 		n++; line++;
 		if (n >= 40) {					// expression too long
@@ -38,7 +38,7 @@ int run_ifthen(char *line) {
 	/* get test variable */
 	int testchar = 0;
 	// skip any spaces
-	if (*line == ' ') while (isspace(*line)) line++;
+	if (*line == ' ') while (isblank(*line)) line++;
 	if (*line == '<' && *(line+1)==' ') {
 		testchar = 1;	// less than
 		line += 1;
@@ -75,10 +75,10 @@ int run_ifthen(char *line) {
 
 
 	/* get 2nd value for tests */
-	if (isspace(*line)) while (isspace(*line)) line++;	// skip spaces
+	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 	memset(expr,0,sizeof(expr)); n=0;
 	while (1) {
-		if (isspace(*line)) break;
+		if (isblank(*line)) break;
 		expr[n] = *line;
 		n++; line++;
 		if (n >= 40) {					// expression too long
@@ -90,7 +90,7 @@ int run_ifthen(char *line) {
 	//printf("ifthen: rvalue = %d\n",rvalue);
 
 	/* get THEN statement */
-	if (isspace(*line)) while (isspace(*line)) line++;
+	if (isblank(*line)) while (isblank(*line)) line++;
 	if (*line == 't' && *(line+1) == 'h' && *(line+2) == 'e' && *(line+3) == 'n') {
 		line += 4;		// skip "THEN"
 	} else {
@@ -99,11 +99,11 @@ int run_ifthen(char *line) {
 	}
 
 	/* get return line number */
-	if (isspace(*line)) while (isspace(*line)) line++;
+	if (isblank(*line)) while (isblank(*line)) line++;
 	memset(expr,0,sizeof(expr)); n = 0;
 	while (1) {
 		expr[n] = *line;
-		if (isspace(*line)) break;
+		if (isblank(*line)) break;
 		if (*line == '\n') break;
 		if (*line == '\0') break;
 		n++; line++;

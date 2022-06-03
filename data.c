@@ -33,6 +33,7 @@ bufscan:
 	n = 0;
 	while (1) {
 		line[n] = buffer[position+n];
+		/* NOTE: \n here not stripped off so it needs to be tested */
 		if (line[n] == '\n' || line[n] == '\0') break;
 		n++;
 		if (n+position >= lastpos) break;
@@ -91,9 +92,9 @@ bufload:
 	/* format: 10 data 1,2,3,4,5\n\0 */
 	testline = line;
 	if (isdigit(*testline)) while (isdigit(*testline)) testline++;	// skip line #
-	if (isspace(*testline)) while (isspace(*testline)) testline++;	// and spaces
+	if (isblank(*testline)) while (isblank(*testline)) testline++;	// and spaces
 	if (isalpha(*testline)) while (isalpha(*testline)) testline++;	// and DATA statement
-	if (isspace(*testline)) while (isspace(*testline)) testline++;	// final space
+	if (isblank(*testline)) while (isblank(*testline)) testline++;	// final space
 
 	/* the rest of the line holds a bunch of integers and commas */
 bufload2:
@@ -112,7 +113,8 @@ bufload2:
 	DataStorage[DataPosition] = atoi(numstr);
 	DataPosition++;
 	testline += 1;		// skip the comma
-	if (*testline == '\n' || *testline == '\0') goto bufload;	// done with this line
+	//if (*testline == '\n' || *testline == '\0') goto bufload;	// done with this line
+	if (*testline == '\0') goto bufload;	// done with this line
 	goto bufload2;		// finish the line
 
 
@@ -137,9 +139,9 @@ int run_read(char *line) {		// load variables with data values
 	extern int DataPosition;
 
 	if (isdigit(*line)) while (isdigit(*line)) line++;  // skip line #
-    if (isspace(*line)) while (isspace(*line)) line++;  // and spaces
+    if (isblank(*line)) while (isblank(*line)) line++;  // and spaces
     if (isalpha(*line)) while (isalpha(*line)) line++;  // and READ statement
-    if (isspace(*line)) while (isspace(*line)) line++;  // final space
+    if (isblank(*line)) while (isblank(*line)) line++;  // final space
 
 	/* format: 1000 read a,b,c,d,e\n\0  */
 	while (1) {

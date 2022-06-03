@@ -19,7 +19,7 @@ int run_for(char *line) {
 	while (isdigit(*line)) line++;			// skip the line number
 	while (isblank(*line)) line++;			// skip spaces
 	while (isalpha(*line)) line++;			// skip FOR command
-	if (*line == ' ') while (isblank(*line)) line++;	// skip more spaces
+	if (isblank(*line)) while (isblank(*line)) line++;	// skip more spaces
 
 	/* get index variable */
 	if (*line >= 'a' && *line <= 'z') 
@@ -30,7 +30,7 @@ int run_for(char *line) {
 	}
 
 	line++;				// skip index variable
-	if (*line == ' ') while (isspace(*line)) line++;	// skip spaces
+	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 
 	/* test = */
 	if (*line != '=') {
@@ -39,12 +39,12 @@ int run_for(char *line) {
 	} else
 		line++;			// skip =
 
-	if (isspace(*line)) while (isspace(*line)) line++;	// skip spaces
+	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 
 	/* get first index value */
 	memset(expr,0,sizeof(expr)); n=0;
 	while (1) {
-		if (isspace(*line)) break;
+		if (isblank(*line)) break;
 		expr[n] = *line;
 		n++; line++;
 		if (n>=40) {
@@ -59,7 +59,7 @@ int run_for(char *line) {
 	NumericVars[index_var - 'a'] = index_start;
 	//printf("run_for: %c set to %d\n",index_var,NumericVars[index_var - 'a']);
 
-	if (*line == ' ') while (isspace(*line)) line++;	// skip spaces
+	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 
 	/* test TO */
 	if (*line == 't' && *(line+1) == 'o') {
@@ -69,12 +69,12 @@ int run_for(char *line) {
 		return -1;
 	}
 
-	if (isspace(*line)) while (isspace(*line)) line++;	// skip spaces
+	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 
 	/* get second index variable */
 	memset(expr,0,sizeof(expr)); n=0;
 	while (1) {
-		if (isspace(*line) || *line == '\n' || *line == '\0') break;
+		if (isblank(*line) || *line == '\n' || *line == '\0') break;
 		expr[n] = *line;
 		n++; line++;
 		if (n>40) {
@@ -106,7 +106,7 @@ int run_for(char *line) {
 	}
 
 	// skip spaces, get step variable
-	if (isspace(*line)) while (isspace(*line)) line++;
+	if (isblank(*line)) while (isblank(*line)) line++;
 	memset(expr,0,sizeof(expr)); n=0;
 	while (1) {
 		if (*line == ' ' || *line == '\0' || *line == '\n') break;

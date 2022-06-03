@@ -11,6 +11,13 @@
  All keywords, variables are in lower case.
  Case is preserved when between double quotes ""
 
+ TODO: 
+ string functions: LEFT$(), MID$(), RIGHT$()
+ trig functions: SIN(), COS(), TAN(), ATN()
+ math functions: INT(), RND(), FN(), SGN()
+ misc functions: TAB()
+ Floating Point math, arrays, DIM()
+
  (C) 2022 Kurt Theis <theis.kurt@gmail.com>
  This is licensed using the MIT license.
 
@@ -19,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define BUFSIZE 65536
 #define LINESIZE 80
@@ -57,6 +65,8 @@ int scanData(char *,int);
 int run_read(char *);
 int run_ongoto(char *);
 
+
+/***** RUN_CLEAR ******/
 /* set all vars to 0 */
 int run_clear(void) {
 	for (int n=0; n<26; n++) 
@@ -235,16 +245,7 @@ int main(int argc, char **argv) {
 	int n=0;				// local var
 	int linecount=0;		// number of program lines
 	char line[LINESIZE];
-	char filename[LINESIZE];
-
-	buffer = malloc(BUFSIZE*sizeof(char));
-	if (buffer == NULL) {
-		printf("memory error\n");
-		return 1;
-	}
-
-	memset(buffer,0,BUFSIZE);
-	memset(filename,0,LINESIZE);
+	char filename[LINESIZE]={};
 
 	/* load a file into memory */
 	if (argc == 1) {		// no args given
@@ -260,13 +261,23 @@ int main(int argc, char **argv) {
 	}
 
 	// filename given
-	for (n=0; n<strlen(filename); n++) if (filename[n]=='\n' || filename[n]=='\r') filename[n]='\0';
+	for (n=0; n<strlen(filename); n++) 
+		if (filename[n]=='\n' || filename[n]=='\r') 
+			filename[n]='\0';
 	FILE *fd = fopen(filename,"r");
 	if (fd == NULL) {
 		printf("Unable to open %s\n",filename);
 		free(buffer);
 		return 1;
 	}
+
+	/* set up memory for the file */
+	buffer = malloc(BUFSIZE*sizeof(char));
+    if (buffer == NULL) {
+        printf("memory error\n");
+        return 1;
+    }
+	memset(buffer,0,BUFSIZE);
 
 	// load a file to memory
 	pos = 0;
@@ -279,7 +290,8 @@ int main(int argc, char **argv) {
 		pos += n;
 		// bounds checking
 		if (pos > (BUFSIZE-80)) {
-			printf("memory full\n");
+			printf("Error - memory full, file load incomplete.\n");
+			printf("Stopped at line %d\n",linecount-1);
 			break;
 		}
 	}
@@ -289,7 +301,9 @@ int main(int argc, char **argv) {
 	printf("File %s loaded. %d bytes free\n",filename,BUFSIZE-pos);
 	printf("%d lines read\n",--linecount);
 
+	/**************************************************/
 	/******** START RUNNING THE BASIC PROGRAM *********/
+	/**************************************************/
 
 	/* 
 	 read each line in the buffer, parse 
@@ -302,6 +316,7 @@ int main(int argc, char **argv) {
 	char ln[6];			// line number string placeholder
 	lineptr = 0;		// initialize position in buffer
 	run_clear();		// set numeric vars to 0 at start
+						// clear string vars, for/next vars
 	/* look for data statements, preload memory */
 	res = scanData(buffer,pos);
 	if (res == -1) {	// memory error - fatal
@@ -323,7 +338,7 @@ parseLoop:
 		continue;
 	}
 	line[n]='\0';		// since memset sets all chars to 0, this just removes the \n
-
+	
 	/* extract the current line number (used for error messages) */
 	sscanf(line,"%s",ln);
 	currentlinenumber = atoi(ln);

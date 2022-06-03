@@ -14,7 +14,7 @@ int run_print(char *line) {
 	//printf("PRINT: %s\n",line);
 	
 	while (isdigit(*line++));	// skip past line number
-	while (isspace(*line++));	// skip spaces
+	if (isblank(*line)) while (isblank(*line)) line++;;	// skip spaces
 	while (isalpha(*line++));	// skip 'print'
 	
 	while (1) {

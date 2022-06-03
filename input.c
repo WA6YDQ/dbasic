@@ -13,9 +13,9 @@ int run_input(char *line) {
 	//printf("INPUT: %s\n",line);
 
 	while (isdigit(*line)) line++;		// skip line number
-	if (isspace(*line)) while (isspace(*line)) line++;	// skip spaces
+	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 	while (isalpha(*line)) line++;		// skip keyword
-	if (isspace(*line)) while (isspace(*line)) line++;	// skip spaces
+	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 
 	/* format: 	input a
 	 * 			input a,b,c
@@ -24,7 +24,8 @@ int run_input(char *line) {
 
 	while (1) {		// loop and test until EOL
 
-		if (*line == '\n' || *line == '\0') break;	// EOL
+		//if (*line == '\n' || *line == '\0') break;	// EOL
+		if (*line == '\0') break;	// EOL
 		if (*line == ',' || *line == ';' || *line == ' ') {			// ignore ,;[ ]
 			line++;
 			continue;

@@ -15,20 +15,20 @@ int run_let(char *line) {
 	//printf("let:line=[%s]\n",line);
 
 	while (isdigit(*line)) line++;  	// skip line number
-	while (isspace(*line)) line++;	// skip spaces
+	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 	while (isalpha(*line)) line++;	// skip LET
 	while (!isalpha(*line)) line++;	// look for variable
 
 	/* test strings */
 	if (*line >= 'a' && *(line+1) == '$' && *line <= 'z') {
 		char strvar = *line; line+=2;		// skip past $
-		if (*line == ' ') while (isspace(*line)) line++;
+		if (*line == ' ') while (isblank(*line)) line++;
 		if (*line != '=') {
 			printf("missing = in LET\n");
 			return -1;
 		}
 		line++;			// skip =
-		if (*line == ' ') while (isspace(*line)) line++;
+		if (*line == ' ') while (isblank(*line)) line++;
 		if (*line != '"') {
 			printf("Bad format in LET for a string\n");
 			return -1;
@@ -64,9 +64,7 @@ int run_let(char *line) {
 		}
 		//printf("%c should be =\n",*line);
 		line++;								// skip =
-		if (isspace(*line)) {				// skip spaces
-			while (isspace(*line)) line++;
-		}
+		if (isblank(*line)) while (isblank(*line)) line++;
 
 		int res = eval(line);
 		//printf("eval return is [%d]\n",res);
