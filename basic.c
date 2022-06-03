@@ -148,7 +148,7 @@ int parse(char *line) {
 
 	if (strcmp(word,"let")==0) {		// let.c
 		res = run_let(line);
-		return 0;
+		return res;
 	}
 	
 	if (strcmp(word,"print")==0) {		// print.c
