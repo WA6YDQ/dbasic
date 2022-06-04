@@ -1,41 +1,39 @@
 all	:	basic.o print.o input.o goto.o gosub.o eval.o let.o \
 		ifthen.o fornext.o data.o
-	$(CC) -o basic basic.o print.o input.o goto.o gosub.o \
+	$(CC) $(FLAGS) -o basic basic.o print.o input.o goto.o gosub.o \
 		eval.o let.o ifthen.o fornext.o data.o $(LIBS)
 
 LIBS = -lm
 CC = gcc
+FLAGS = -Wall
 
 basic.o	:	basic.c
-	cc -c basic.c
-
-interp.o	:	interp.c
-	cc -c interp.c
+	$(CC) -c basic.c
 
 print.o	:	print.c
-	cc -c print.c
+	$(CC) -c print.c
 
 input.o	:	input.c
-	cc -c input.c
+	$(CC) -c input.c
 
 goto.o	:	goto.c
-	cc -c goto.c
+	$(CC) -c goto.c
 
 gosub.o	:	gosub.c
-	cc -c gosub.c
+	$(CC) -c gosub.c
 
 eval.o	:	eval.c
-	cc -c eval.c 
+	$(CC) -c eval.c 
 
 let.o	:	let.c
-	cc -c let.c
+	$(CC) -c let.c
 
 ifthen.o	:	ifthen.c
-	cc -c ifthen.c
+	$(CC) -c ifthen.c
 
 fornext.o	:	fornext.c
-	cc -c fornext.c
+	$(CC) -c fornext.c
 
 data.o	:	data.c
-	cc -c data.c
+	$(CC) -c data.c
 
