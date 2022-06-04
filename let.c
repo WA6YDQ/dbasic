@@ -94,28 +94,6 @@ int run_let(char *line) {
 			continue;
 		}
 
-		/* test numeric 
-		if (*line >= 'a' && *line <= 'z') {		// numeric assignment
-			char usevar = *line;				// get the variable to save to
-			//printf("saving to var [%c]\n",usevar);
-			while (*line != '=') {				// find =
-				line++;
-				if (*line == '\0') {
-					printf("Missing assignment\n");
-					return 1;
-				}
-			}
-			//printf("%c should be =\n",*line);
-			line++;								// skip =
-			if (isblank(*line)) while (isblank(*line)) line++;
-
-			int res = eval(line);
-			//printf("eval return is [%d]\n",res);
-			NumericVars[usevar-'a'] = res;
-
-			continue;
-		}
-		*/
 		
 		/* unknown char */
 		printf("unknown character in LET statement [%c]\n",*line);
@@ -123,8 +101,7 @@ int run_let(char *line) {
 		continue;
 	}
 
-	printf("var is not numeric\n");
-	/* test for strings here */
-	return 0;
+	printf("Error - unknown error in LET\n");
+	return -1;
 }
 

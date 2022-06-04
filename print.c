@@ -20,8 +20,7 @@ int run_print(char *line) {
 	while (1) {
 		if (*line == '\0') break;
 		
-		if (*line == ' ') {
-			printf(" ");
+		if (isblank(*line)) {		// ignore blanks (space and tabs)
 			line++;
 			continue;
 		}
@@ -61,7 +60,7 @@ int run_print(char *line) {
 		}
 
 
-		/* examples: print a+5, (b*72/c), r/(10+6)/w; */
+		/* vars: examples: print a+5, (b*72/c), r/(10+6)/w; */
 		if (*line == '(' || *line == '-' || (*line >= 'a' && *line <= 'z')) {		// expression starting with a var
 			int n=0;
 			memset(expr,0,sizeof(expr));
@@ -75,7 +74,7 @@ int run_print(char *line) {
 			continue;
 		}
 
-		/* examples: print 10, 35+7, 5*(a+3) */
+		/* numbers: examples: print 10, 35+7, 5*(a+3) */
 		if (*line == '(' || *line == '-' || (*line >= '0' && *line <= '9')) {		// expression starting with a number
 			int n=0;
 			memset(expr,0,sizeof(expr));
