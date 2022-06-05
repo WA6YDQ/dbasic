@@ -5,9 +5,9 @@
 #include <string.h>
 
 int run_print(char *line) {
-	int result;					// result of expression
+	float result;					// result of expression
 	char expr[40];
-	int eval(char *);
+	float eval(char *);
 	char linenumber[6];
 	extern char CharVars[][80];
 	sscanf(line,"%s",linenumber);
@@ -70,7 +70,13 @@ int run_print(char *line) {
 			}
 			//printf("sending to eval:{%s} ",expr);
 			result = eval(expr);
-			printf("%d",result);
+			printf("%g",result);
+			/*
+			if (result > (int)result)  
+				printf("%f",result);
+			else
+				printf("%8.0f",result);
+			*/
 			continue;
 		}
 
@@ -84,13 +90,20 @@ int run_print(char *line) {
 			}
 			//printf("sending to eval:{%s} ",expr);
 			result = eval(expr);
-			printf("%d",result);
+			printf("%g",result);
+			/*
+			if (result > (int)result)
+				printf("%f",result);
+			else
+				printf("%8.0f",result);
+			*/
 			continue;
 		}
 
-		printf("unknown char[%c] in line number %s\n",*line,linenumber);
-		line++;
-		continue;
+		printf("Error - unknown char in PRINT %c\n",*line);
+		return -1;
+		//line++;
+		//continue;
 	}
 	if (*(line-1) != ';') printf("\n");
 	return 0;

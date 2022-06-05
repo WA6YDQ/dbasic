@@ -11,8 +11,9 @@
 
 int run_ifthen(char *line) {
 
-	int eval(char *);
-	int lvalue=0, rvalue=0, linenum=0, n=0;
+	float eval(char *);
+	float lvalue=0, rvalue=0, linenum=0;
+	int n=0;
 	char expr[40] = {};					// expression for eval()
 	//printf("line is [%s]\n",line);
 	

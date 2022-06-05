@@ -8,8 +8,9 @@
 
 int run_let(char *line) {
 
-	int eval(char *);
-	extern int NumericVars[];
+	float eval(char *);
+	//extern int NumericVars[];
+	extern float NumericVars[];
 	extern char CharVars[][80];
 
 	//printf("let:line=[%s]\n",line);

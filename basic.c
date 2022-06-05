@@ -3,20 +3,26 @@
  Statements in this version of BASIC:
  REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
  IF/THEN, FOR/NEXT/STEP, INPUT, READ, DATA,
- RESTORE, ON/GOTO
+ RESTORE, ON/GOTO, CLEAR, STOP, DEF FNx
 
- Integer numeric variables are a...z
+ Formulas: a+b, a-b, a*b, a/b, a**b, -a
+ Equality Tests: >, >=, <, <=, =, <>, !=
+ Logical:  a&b, a|b, a^b (and/or/xor)
+ Functions: SIN(), COS(), TAN(), EXP(), LOG(),
+ LOG10(), SQR(),
+
+ Floating point numeric variables are a...z
  String variables are a$...z$
 
  All keywords, variables are in lower case.
  Case is preserved when between double quotes ""
 
  TODO: 
+ keywords: ON/GOSUB, DEF(), FOPEN(), FCLOSE(), FREAD(), FWRITE()
  string functions: LEFT$(), MID$(), RIGHT$()
- trig functions: SIN(), COS(), TAN(), ATN()
  math functions: INT(), RND(), FN(), SGN()
  misc functions: TAB()
- Floating Point math, arrays, DIM()
+ arrays, DIM()
 
  (C) 2022 Kurt Theis <theis.kurt@gmail.com>
  This is licensed using the MIT license.
@@ -32,22 +38,23 @@
 #define LINESIZE 80
 
 /* globals */
-char *buffer;			// memory buffer holding the basic program
-int NumericVars[26];	// numeric integer variables a-z
+char *buffer;					// memory buffer holding the basic program
+//int NumericVars[26];			// numeric integer variables a-z
+float NumericVars[26];
 char CharVars[26][LINESIZE];	// a$ thru z$, max 80 chars long each
-int pos = 0;			// current end position of the buffer
-int currentlinenumber = 0;	// line number of the current line being tested
-int lineptr = 0;		// current buffer position during run loop
-int returnlinenumber = 0;	// position in buffer when RETURN command issued
-int index_start = 0;	// FOR/NEXT start index
-int index_end = 0;		// FOR/NEXT end index
-int index_step = 0;		// FOR/NEXT step index
-char index_var;			// FOR/NEXT count variable
-int forlinenumber = 0;	// FOR/NEXT line number to return to
-int *DataStorage;		// DATA statement storage, will assign later
-int DataStorageMax=0;	// max number of data elements
-int DataPosition=0;		// position of read data objects
-
+int pos = 0;					// current end position of the buffer
+int currentlinenumber = 0;		// line number of the current line being tested
+int lineptr = 0;				// current buffer position during run loop
+int returnlinenumber = 0;		// position in buffer when RETURN command issued
+float index_start = 0;			// FOR/NEXT start index
+float index_end = 0;				// FOR/NEXT end index
+float index_step = 0;				// FOR/NEXT step index
+char index_var;					// FOR/NEXT count variable
+int forlinenumber = 0;			// FOR/NEXT line number to return to
+float *DataStorage;				// DATA statement storage, will assign later
+int DataStorageMax=0;			// max number of data elements
+int DataPosition=0;				// position of read data objects
+char fn[26][80]={};				// function definitions
 
 /* extern functions */
 int parse(char *);
@@ -56,7 +63,7 @@ int run_print(char *);
 int run_input(char *);
 int run_goto(char *);
 int run_gosub(char *);
-int eval(char *);
+float eval(char *);
 int getstartaddress(int);
 int run_ifthen(char *);
 int run_for(char *);
@@ -64,7 +71,7 @@ int run_next(char *);
 int scanData(char *,int);
 int run_read(char *);
 int run_ongoto(char *);
-
+int def(char *);
 
 /***** RUN_CLEAR ******/
 /* set all vars to 0 */
@@ -79,6 +86,8 @@ int run_clear(void) {
 	forlinenumber = 0;
 	// set char vars to NULL
 	for (int n=0; n<=26; n++) memset(CharVars[n],0,LINESIZE);
+	// set functions to null
+	for (int n=0; n<26; n++) memset(fn[n],0,LINESIZE);
 	return 0;
 }
 
@@ -146,6 +155,11 @@ int parse(char *line) {
 		return 0;
 	}
 
+	if (strcmp(word,"def")==0) {		// def fnx
+		res = def(line);
+		return res;
+	}
+
 	if (strcmp(word,"let")==0) {		// let.c
 		res = run_let(line);
 		return res;
@@ -163,10 +177,13 @@ int parse(char *line) {
 		run_input(line);
 		return 0;
 	}
+	if (strcmp(word,"stop")==0) {		// stop execution
+		return -998;
+	}
 	if (strcmp(word,"end")==0) {		// end the program
 		return -999;
 	}
-	if (strcmp(word,"clr")==0) {		// clear numeric variables
+	if (strcmp(word,"clear")==0) {		// clear numeric variables
 		run_clear();
 		return 0;
 	}
@@ -351,6 +368,12 @@ parseLoop:
 	res = parse(line);
 	
 	/* test return code */
+	if (res == -998) {				// STOP statement
+		printf("STOPPED in line %d\n",currentlinenumber);
+		free(buffer);
+		free(DataStorage);
+		exit(0);
+	}
 	if (res == -999) {				// END Statement
 		printf("END statement in line %d\n",currentlinenumber);
 		free(buffer);

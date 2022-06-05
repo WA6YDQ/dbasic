@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 int run_input(char *line) {
-	extern int NumericVars[];
+	extern float NumericVars[];
 	extern char CharVars[][80];
 	char getline[20];
 	
@@ -47,6 +47,7 @@ int run_input(char *line) {
 			char strvar = *line;		// get variable
 			//printf("input: var is %c\n",strvar);
 			memset(CharVars[strvar-'a'],0,sizeof(CharVars[strvar-'a']));
+			printf("?");
 			fgets(getline,80,stdin);
 			getline[strlen(getline)-1] = '\0';		// strip off \n
 			strcpy(CharVars[strvar-'a'],getline);
@@ -58,8 +59,9 @@ int run_input(char *line) {
 
 		/* if a-z get numeric input */
 		if (*line >= 'a' && *line <= 'z') {
+			printf("?");
 			fgets(getline,20,stdin);
-			NumericVars[*line-'a'] = atoi(getline);
+			NumericVars[*line-'a'] = atof(getline);
 			line++;
 			continue;
 		}

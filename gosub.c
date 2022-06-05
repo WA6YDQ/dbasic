@@ -6,11 +6,11 @@
 
 int run_gosub(char *line) {		// get line number, return it
 	char ln[6], word[6], linenum[40];
-	int eval(char *);
+	float eval(char *);
 
 	sscanf(line,"%s %s %s",ln,word,linenum);
 
 	/* return value of expression after 'gosub' as the line number */
-	return (eval(linenum));
+	return ((int)(eval(linenum)));
 }
 

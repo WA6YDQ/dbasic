@@ -14,7 +14,7 @@
  * memory space with the data in the statements.
  */
 
-extern int *DataStorage;
+extern float *DataStorage;
 extern int DataStorageMax;
 extern int DataPosition;
 
@@ -59,7 +59,7 @@ step2:
 	//printf("bufscan: number of data elements: %d\n",DataStorageMax);
 	
 	/* define storage space for the data elements */
-	DataStorage = malloc((DataStorageMax+1)*sizeof(int));
+	DataStorage = malloc((DataStorageMax+1)*sizeof(float));
 	if (DataStorage == NULL) {
 		printf("Memory Error allocating data elements\n");
 		return -1;
@@ -96,7 +96,7 @@ bufload:
 	if (isalpha(*testline)) while (isalpha(*testline)) testline++;	// and DATA statement
 	if (isblank(*testline)) while (isblank(*testline)) testline++;	// final space
 
-	/* the rest of the line holds a bunch of integers and commas */
+	/* the rest of the line holds a bunch of floats and commas */
 bufload2:
 	n = 0;
 	memset(numstr,0,sizeof(numstr));
@@ -110,7 +110,7 @@ bufload2:
 	/* value in intval */
 	numstr[n+1] = '\0';
 	//printf("data element: %s\n",numstr);
-	DataStorage[DataPosition] = atoi(numstr);
+	DataStorage[DataPosition] = atof(numstr);
 	DataPosition++;
 	testline += 1;		// skip the comma
 	//if (*testline == '\n' || *testline == '\0') goto bufload;	// done with this line
@@ -133,8 +133,9 @@ step3:
 
 	
 int run_read(char *line) {		// load variables with data values
-	extern int NumericVars[];
-	extern int *DataStorage;
+	//extern int NumericVars[];
+	extern float NumericVars[];
+	extern float *DataStorage;
 	extern int DataStorageMax;
 	extern int DataPosition;
 

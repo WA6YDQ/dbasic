@@ -7,13 +7,13 @@
 
 int run_for(char *line) {
 	extern char index_var;
-	extern int index_start;
-	extern int index_end;
-	extern int index_step;
-	extern int NumericVars[];
+	extern float index_start;
+	extern float index_end;
+	extern float index_step;
+	extern float NumericVars[];
 	char expr[40] = {};
 	int n=0;
-	int eval(char *);
+	float eval(char *);
 
 	//printf("run_for: line [%s]\n",line);
 	while (isdigit(*line)) line++;			// skip the line number
