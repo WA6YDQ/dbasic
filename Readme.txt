@@ -1,7 +1,9 @@
 This is the readme for dbasic - an implimentation of Dartmouth BASIC.
 
-As of Jun 2 2022 this is incomplete and I'm using github 
-as my off-site backup.
+As of Jun 5 2022 this is fully functional but
+incomplete. There are still some functions and 
+keywords I'll be adding.
+(I'm using github as my off-site backup).
 
 To build, type 'make'
 
