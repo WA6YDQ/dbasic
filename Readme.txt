@@ -26,7 +26,10 @@ END, IF/THEN, FOR/NEXT/STEP, INPUT,
 DATA, READ, RESTORE, CLEAR, STOP, DEF FNx
 
 The following functions are valid:
-SIN(), COS(), TAN(), EXP(), LOG(), LOG10(), SQR() 
+SIN(), COS(), TAN(), EXP(), LOG(), LN(), SQR() 
+(Note: LOG() is base 10, LN() is natural log
+like my calculator shows)
+
 
 The following math functions are valid:
 +, -, *, /, **, - (unary negative)
