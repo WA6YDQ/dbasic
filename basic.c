@@ -8,8 +8,8 @@
  Formulas: a+b, a-b, a*b, a/b, a**b, -a
  Equality Tests: >, >=, <, <=, =, <>, !=
  Logical:  a&b, a|b, a^b (and/or/xor)
- Functions: SIN(), COS(), TAN(), EXP(), LOG(),
- LOG10(), SQR(),
+ Functions: SIN(), COS(), TAN(), EXP(), LN(),
+ LOG(), SQR(),
 
  Floating point numeric variables are a...z
  String variables are a$...z$
@@ -18,9 +18,10 @@
  Case is preserved when between double quotes ""
 
  TODO: 
- keywords: ON/GOSUB, DEF(), FOPEN(), FCLOSE(), FREAD(), FWRITE()
+ keywords: ON/GOSUB, DEF(), FOPEN(), FCLOSE(), FREAD(), 
+ FWRITE(), RANDOM(IZE)
  string functions: LEFT$(), MID$(), RIGHT$()
- math functions: INT(), RND(), FN(), SGN()
+ math functions: INT(), RND(), SGN()
  misc functions: TAB()
  arrays, DIM()
 
