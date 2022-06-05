@@ -128,13 +128,13 @@ float eval(char *expr) {
 				funcvalue = expf(tvalue);
 				goto functend;
 			}
-			/*   LOG() (natural log) */
-			if (strncmp(functname,"log",3)==0) {
+			/*   LN() (natural log, 42=3.737) like my calculator shows */
+			if (strncmp(functname,"ln",2)==0) {
 				funcvalue = logf(tvalue);
 				goto functend;
 			}
-			/*   LOG10() (base 10 log)  */
-			if (strncmp(functname,"log10",5)==0) {
+			/*   LOG() (base 10 log, 42=1.6232) like my calculator shows */
+			if (strncmp(functname,"log",3)==0) {
 				funcvalue = log10f(tvalue);
 				goto functend;
 			}
