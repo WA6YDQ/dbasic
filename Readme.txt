@@ -1,6 +1,6 @@
 This is the readme for dbasic - an implimentation of Dartmouth BASIC.
 
-As of Jun 5 2022 this is fully functional but
+As of Jun 8 2022 this is fully functional but
 incomplete. There are still some functions and 
 keywords I'll be adding.
 (I'm using github as my off-site backup).
@@ -51,6 +51,10 @@ An example:
 Results in:
 f=1.32696e+07
 
+All expressions are algabraic in order (*/ have
+precidence over +-). Expressions in parens have priority: 
+(a+b)*c is different from a+b*c
+ 
 
 There are basic program examples for each keyword. See the
 file *.bas in the examples directory of this repository.
@@ -73,11 +77,6 @@ Here the keyword LET (as ALL keywords) must have surrounding spaces.
 15 let g=a*e-b*d
 Spaces between elements are also OK:
 30 let g = a  * e  - b  *  d
-
-NOTE: Expressions are NOT algebraic. a+b*c is NOT a+(b*c)
-Evaluation is left to right. Expressions inside parens: a+(b*c) 
-ARE evaluated first.
-(Expect this to change to algebraic order later).
 
 In Dartmouth, the ^ character is used for powers. IE 2^3 would
 be 2*2*2. This version of BASIC uses ** instead of ^, IE 2**3
