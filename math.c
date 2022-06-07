@@ -145,6 +145,7 @@ float eval(char *expr) {
 				fvalue = sqrt(tvalue);
 				goto funcend;
 			}
+			/* NOTE: All trig functions are in radians */
 			/* SIN() */
 			if (strncmp(funcname,"sin",3)==0) {
 				fvalue = sinf(tvalue);
@@ -158,6 +159,21 @@ float eval(char *expr) {
 			/* TAN()  */
 			if (strncmp(funcname,"tan",3)==0) {
 				fvalue = tanf(tvalue);
+				goto funcend;
+			}
+			/* EXP()  */
+			if (strncmp(funcname,"exp",3)==0) {
+				fvalue = expf(tvalue);
+				goto funcend;
+			}
+			/* LOG()  (base 10) log(42)=1.6232 */
+			if (strncmp(funcname,"log",3)==0) {
+				fvalue = log10f(tvalue);
+				goto funcend;
+			}
+			/* LN() natural log, ln(42)=3.7377 */
+			if (strncmp(funcname,"ln",2)==0) {
+				fvalue = logf(tvalue);
 				goto funcend;
 			}
 			// not a recognized function

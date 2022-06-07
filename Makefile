@@ -25,6 +25,8 @@ goto.o	:	goto.c
 gosub.o	:	gosub.c
 	$(CC) $(FLAGS) -c gosub.c
 
+# the functions in eval.c are depreciated
+# in favor of the functioons in math.c
 #eval.o	:	eval.c
 #	$(CC) $(FLAGS) -c eval.c 
 
