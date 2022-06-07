@@ -48,7 +48,7 @@ int ismathchar(char ch) {
 
 
 float domath(float lval, float rval, char ch) {
-	printf("domath: lval=%g  rval=%g  func=%c\n",lval,rval,ch);
+	// printf("domath: lval=%g  rval=%g  func=%c\n",lval,rval,ch);
 	if (ch == '+') return lval+rval;
 	if (ch == '-') return lval-rval;
 	if (ch == '*') return lval*rval;
