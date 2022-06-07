@@ -1,7 +1,7 @@
-all:	basic.o print.o input.o goto.o gosub.o eval.o let.o \
+all:	basic.o print.o input.o goto.o gosub.o math.o let.o \
 		ifthen.o fornext.o data.o def.o
 	$(CC) $(FLAGS) -o basic basic.o print.o input.o goto.o gosub.o \
-		eval.o let.o ifthen.o fornext.o data.o def.o $(LIBS)
+		math.o let.o ifthen.o fornext.o data.o def.o $(LIBS)
 
 clean:	
 	/bin/rm -f *.o
@@ -25,8 +25,11 @@ goto.o	:	goto.c
 gosub.o	:	gosub.c
 	$(CC) $(FLAGS) -c gosub.c
 
-eval.o	:	eval.c
-	$(CC) $(FLAGS) -c eval.c 
+#eval.o	:	eval.c
+#	$(CC) $(FLAGS) -c eval.c 
+
+math.o	:	math.c
+	$(CC) $(FLAGS) -c math.c
 
 let.o	:	let.c
 	$(CC) $(FLAGS) -c let.c
