@@ -33,7 +33,7 @@
 /* return 1 if char is a number */
 int isnum(char ch) {
 	if (ch >= '0' && ch <= '9') return 1;
-	if (ch == 'e' || ch == 'E') return 1;
+	if (ch == 'e' || ch == '-') return 1;
 	if (ch == '.') return 1;
 	return 0;
 }
@@ -48,6 +48,7 @@ int ismathchar(char ch) {
 
 
 float domath(float lval, float rval, char ch) {
+	// debugging
 	// printf("domath: lval=%g  rval=%g  func=%c\n",lval,rval,ch);
 	if (ch == '+') return lval+rval;
 	if (ch == '-') return lval-rval;
@@ -69,6 +70,8 @@ float domath(float lval, float rval, char ch) {
 float eval(char *expr) {
 
 	extern float NumericVars[];
+	extern char fn[26][80];
+
 	int NEGFLAG=0;		// true when unary - found
 	//int MATHFLAG=0;		// true when pending math operation
 
@@ -77,11 +80,15 @@ float eval(char *expr) {
 	char mathchr[STACKMAX];		// holds math expressions
 	int mathchrpos = 1;
 
+	char funcname[20] = {};
+	char funcval[40] = {};
+
 	/* initialize storage */
 	for (int n=0; n<STACKMAX; n++) val[n]=0;
 	for (int n=0; n<STACKMAX; n++) mathchr[n]='\0';
 
-	//printf("math: received expr:[%s]\n",expr);
+	// debugging
+	// printf("eval: expression: [%s]\n",expr);
 
 	while (1) {
 
@@ -105,44 +112,45 @@ float eval(char *expr) {
 			continue;
 		}
 
-		/* see if expression is enclosed by parenthesis: group them and eval */
-		/* NOTE: DOES NOT WORK FOR NEXTED () */
-		if (*expr == '(') {
-			expr++;			// skip opening parens
-			int n=0; char temp[80]={}; memset(temp,0,sizeof(temp));
-			while (1) {
-				if (*expr == ')') break;
-				temp[n] = *expr;
-				expr++; n++;
-			}
-			expr++;		// skip ending parens
-			float res = eval(temp);		// evaluate the expression between ()
+		/* test for user-defined functions (fn[a..z]) */
+		if (*expr == 'f' && *(expr+1) == 'n' && (*(expr+2) >= 'a' && *(expr+2) <= 'z')) {
+			char fnchar = *(expr+2);
+			char *tmpfn = fn[fnchar - 'a'];
+			expr += 3;
+			float res = eval(tmpfn);
 			val[valpos] = res;
 			valpos++;
 			continue;
 		}
 
+
 		/* test for math function (sin, tan, sqr, etc.) */
 		if (isalpha(*expr) && isalpha(*(expr+1))) {
-			char funcname[10]={}; int n=0;
-			while (*expr != '(') {
+			int n=0;
+			memset(funcname,0,sizeof(funcname));
+			// get the name of the function up to ( 
+			while (1) {
+				if (*expr == '(') break;
 				funcname[n] = *expr;
 				expr++; n++;
 			}
 			expr++;		// skip initial (
 			// now get value inside ()
-			char funcval[40]={}; n=0;
-			while (*expr != ')') {
+			n=0;
+			memset(funcval,0,sizeof(funcval));
+			while (1) {
+				if (n > sizeof(funcval)) break;
+				if (*expr == ')') break;
 				funcval[n] = *expr;
 				expr++; n++;
 			}
 			expr++;		// skip ending )
 			float tvalue = eval(funcval);
-			float fvalue = 0.0;
+			float fvalue = 0;
 			/* now see what the function is */
 			/* SQR() */
 			if (strncmp(funcname,"sqr",3)==0) {
-				fvalue = sqrt(tvalue);
+				fvalue = sqrtf(tvalue);
 				goto funcend;
 			}
 			/* NOTE: All trig functions are in radians */
@@ -176,6 +184,7 @@ float eval(char *expr) {
 				fvalue = logf(tvalue);
 				goto funcend;
 			}
+			
 			// not a recognized function
 			printf("Error - %s not a recognized function\n",funcname);
 			exit(1);
@@ -230,7 +239,8 @@ float eval(char *expr) {
 
 		/* combine digits (including e/E and .) into a number */
 		if (isnum(*expr)) {
-			int n=0; char number[12]={};
+			int n=0; char number[20];
+			memset(number,0,sizeof(number));
 			while (1) {
 				if (isnum(*expr)==0) break;
 				number[n] = *expr;
@@ -246,8 +256,29 @@ float eval(char *expr) {
 			continue;
 		}
 
+		/* see if expression is enclosed by parenthesis: group them and eval */
+        if (*expr == '(') {
+            expr++;         // skip opening parens
+            int n=0; char temp[80]; 
+			memset(temp,0,sizeof(temp));
+            int parencount=1;
+			while (1) {
+                if (*expr == ')') parencount--;
+				if (parencount==0) break;
+                if (*expr == '(') parencount++;
+                temp[n] = *expr;
+                expr++; n++;
+            }
+            expr++;     // skip ending parens
+			float res = eval(temp);     // evaluate the expression between ()
+			val[valpos] = res;
+            valpos++;
+            continue;
+        }
+
+
 		/* undefined character in expression */	
-		printf("math: unknown char '%c'\n",*expr);
+		printf("eval: unknown char '%c' in expression.\n",*expr);
 		expr += 1;
 		continue;
 
