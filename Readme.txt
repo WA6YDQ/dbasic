@@ -6,8 +6,11 @@ keywords I'll be adding.
 (I'm using github as my off-site backup).
 
 To build, type 'make'
+To install, type sudo make install
 
-To run, use ./basic [file.bas]
+The binary 'dbasic' will be installed in /usr/local/bin
+
+To run, type dbasic [file.bas]
 
 Usage:
 
@@ -90,6 +93,7 @@ as != for a not equal comparison.
 --- Usage Notes ---
 
 You may get slightly differing results when calculating defined functions
-vs calculating directly. I believe this is due to using floating point
-and the resolution of the current c library. More investigation is needed.
+vs calculating directly. I believe this is due to rounding errors
+in the floating point routines of the clib libraries.
+More investigation is needed.
  

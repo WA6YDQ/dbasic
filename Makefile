@@ -1,10 +1,13 @@
 all:	basic.o print.o input.o goto.o gosub.o math.o let.o \
 		ifthen.o fornext.o data.o def.o
-	$(CC) $(FLAGS) -o basic basic.o print.o input.o goto.o gosub.o \
+	$(CC) $(FLAGS) -o dbasic basic.o print.o input.o goto.o gosub.o \
 		math.o let.o ifthen.o fornext.o data.o def.o $(LIBS)
 
 clean:	
 	/bin/rm -f *.o
+
+install:
+	cp dbasic /usr/local/bin/dbasic
 
 LIBS = -lm
 CC = gcc
