@@ -44,7 +44,7 @@ The following logical tests are valid:
 
 User functions can be defined. def fn{a..z}
 An example: 
-10 def fnf = "1/(6.28*sqr(l*c))"
+10 def fnf 1/(6.28*sqr(l*c))
 20 let l=1.2e-6, c=120e-12
 30 let f=fnf
 40 print "f=";f
@@ -87,4 +87,9 @@ and | is logocal OR). Dartmouth didn't have logical operators.
 Dartmouth used <> as not equal. This version also uses <> as well
 as != for a not equal comparison.
 
+--- Usage Notes ---
 
+You may get slightly differing results when calculating defined functions
+vs calculating directly. I believe this is due to using floating point
+and the resolution of the current c library. More investigation is needed.
+ 
