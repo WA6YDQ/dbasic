@@ -1,6 +1,6 @@
 This is the readme for dbasic - an implimentation of Dartmouth BASIC.
 
-As of Jun 8 2022 this is fully functional but
+As of Jun 9 2022 this is fully functional but
 incomplete. There are still some functions and 
 keywords I'll be adding.
 (I'm using github as my off-site backup).
@@ -10,18 +10,22 @@ To install, type sudo make install
 
 The binary 'dbasic' will be installed in /usr/local/bin
 
-To run, type dbasic [file.bas]
+To start, type dbasic [file.bas] or dbasic (no file given)
 
 Usage:
 
-There is no built-in text editor. Use an external text editor
-to create the BASIC source (and sort the lines per/line number). 
+If started with a basic file as the second arguement, the
+basic file will be loaded and executed. dbasic will terminate
+when the basic program ends.
+
+If no filename is given, a Ready prompt will be displayed. You can
+enter basic lines or commands.
 
 Line numbers are required, all characters (except between double
-quotes "" are lower case. (expect this to change later).
+quotes "" are lower case. (this may change later).
 
 Variables {a...z} are floating point numeric.
-1, 21.5, -0.3, 2.4e15 are all valid
+1, 21.5, -0.3, 2.4e15, 2.1e-5 are all valid
 
 Variables {a$...z$} are string (max 80 chars).
 
@@ -56,7 +60,7 @@ f=1.32696e+07
 
 All expressions are algabraic in order (*/ have
 precidence over +-). Expressions in parens have priority: 
-(a+b)*c is different from a+b*c
+(a+b)*c is different from a+b*c. Parens can be nested.
  
 
 There are basic program examples for each keyword. See the
@@ -65,6 +69,17 @@ file *.bas in the examples directory of this repository.
 This basic interpreter follows (mostly, exceptions below)
 Dartmouth BASIC described in the book "BASIC 4th Edition"
 dated January 1968.
+
+
+These are the basic commands dbasic understands:
+save [filename]	(save the buffer to a disk file)
+load [filename]	(load a disk file to the buffer)
+new 		(delete the buffer)
+list		(display the basic lines in the buffer)
+run		(start running the basic program)
+exit & quit	(exit dbasic w/o saving)
+free		(show available buffer memory)
+
 
 --- Language exceptions ---
 In the original Dartmouth BASIC you could have spaces (or
