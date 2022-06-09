@@ -24,6 +24,11 @@ enter basic lines or commands.
 Line numbers are required, all characters (except between double
 quotes "" are lower case. (this may change later).
 
+Entering a line will save the line in the buffer.
+Entering a line number by itself will delete an existing line. 
+Entering a line with an existing line number will replace the 
+original line.
+
 Variables {a...z} are floating point numeric.
 1, 21.5, -0.3, 2.4e15, 2.1e-5 are all valid
 
