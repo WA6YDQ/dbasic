@@ -34,9 +34,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "dbasic.h"
 
-#define BUFSIZE 65536
-#define LINESIZE 80
 
 /* globals */
 char *buffer;					// memory buffer holding the basic program
@@ -73,6 +72,10 @@ int scanData(char *,int);
 int run_read(char *);
 int run_ongoto(char *);
 int def(char *);
+int insert(char *);
+void load(char *);
+void save(char *);
+
 
 /***** RUN_CLEAR ******/
 /* set all vars to 0 */
@@ -257,72 +260,99 @@ int parse(char *line) {
 }
 
 
+/*************************/
 /********* MAIN **********/
+
 int main(int argc, char **argv) {
 
 	int n=0;				// local var
-	int linecount=0;		// number of program lines
 	char line[LINESIZE];
 	char filename[LINESIZE]={};
+	int LOADFLAG = 0;
+	int res = 0;
 
-	/* load a file into memory */
-	if (argc == 1) {		// no args given
-		printf("Filename? ");
-		fgets(filename,LINESIZE,stdin);
-		if (filename[0]=='\r' || filename[0]=='\n') {	// exit program
-			free(buffer);
-			return 1;
-		}
-
-	} else {
-		strcpy(filename,argv[1]);
-	}
-
-	// filename given
-	for (n=0; n<strlen(filename); n++) 
-		if (filename[n]=='\n' || filename[n]=='\r') 
-			filename[n]='\0';
-	FILE *fd = fopen(filename,"r");
-	if (fd == NULL) {
-		printf("Unable to open %s\n",filename);
-		free(buffer);
-		return 1;
-	}
-
-	/* set up memory for the file */
+	/* set up memory for the basic source */
 	buffer = malloc(BUFSIZE*sizeof(char));
     if (buffer == NULL) {
         printf("memory error\n");
         return 1;
     }
 	memset(buffer,0,BUFSIZE);
-
-	// load a file to memory
-	pos = 0;
-	while (1) {
-		memset(line,0,LINESIZE);
-		fgets(line,LINESIZE,fd);
-		if (feof(fd)) break;	// end of file
-		linecount++;
-		for (n=0; n<strlen(line); n++) buffer[pos+n] = line[n];
-		pos += n;
-		// bounds checking
-		if (pos > (BUFSIZE-80)) {
-			printf("Error - memory full, file load incomplete.\n");
-			printf("Stopped at line %d\n",linecount-1);
-			break;
-		}
+	LOADFLAG = 0;
+	// see if filename given: if so, load it
+	if (argc==1) {
+		printf("Ready.\n");
+		goto runloop;
 	}
-	// done reading file
-	fclose(fd);
+
+	// load and execute the program. 
+	strcpy(filename,argv[1]);
+	load(filename);
+	if (pos > 0) LOADFLAG=1;
+	/* start running program as soon as it's loaded */
+	goto runit;
 	
-	printf("File %s loaded. %d bytes free\n",filename,BUFSIZE-pos);
-	printf("%d lines read\n",--linecount);
+	
+
+	/**************************************************************/
+	/* this is the user interface when the program is not running */
+	/**************************************************************/
+
+runloop:
+	fgets(line,LINESIZE,stdin);
+	if (strncmp(line,"quit",4)==0 || strncmp(line,"exit",4)==0) {
+		free(DataStorage); free(buffer);
+		exit(0);
+	}
+	if (strncmp(line,"list",4)==0) {	// show the buffer
+		if (pos == 0) {
+			printf("Buffer empty.\nReady.\n");
+			goto runloop;
+		}
+		for (int i=0; i<pos; i++) printf("%c",buffer[i]);
+		printf("Ready.\n");
+		goto runloop;
+	}
+	if (strncmp(line,"new",3)==0) {		// clear the buffer
+		memset(buffer,0,BUFSIZE);
+		pos = 0;
+		printf("Ready.\n");
+		goto runloop;
+	}
+	if (strncmp(line,"load",4)==0) {	// load a file, run program after load
+		char cmd[5]; // space for 'load' cmd
+		sscanf(line,"%s %s",cmd,filename); filename[strlen(filename)]='\0';
+		load(filename);
+		printf("Ready.\n");
+		goto runloop;
+	}
+	if (strncmp(line,"save",4)==0) {		// save the buffer to a file
+		char cmd[5],filename[40];
+		sscanf(line,"%s %s",cmd,filename);
+		filename[strlen(filename)]='\0';
+		save(filename);
+		printf("Ready.\n");
+		goto runloop;
+	}
+	if (strncmp(line,"run",3)==0) goto runit;
+	if (strncmp(line,"free",4)==0) {		// show available memory
+		printf("%d Bytes Free\nReady.\n",BUFSIZE-pos);
+		goto runloop;
+	}
+	// not a command,
+	// save the line, replace or delete if just line num entered
+	if (line[0] == '\n') goto runloop;		// ignore empty lines
+	
+	insert(line);
+	goto runloop;
+
+
+
 
 	/**************************************************/
 	/******** START RUNNING THE BASIC PROGRAM *********/
 	/**************************************************/
-
+runit:
 	/* 
 	 read each line in the buffer, parse 
 	 the statements, loop until END statement 
@@ -330,7 +360,7 @@ int main(int argc, char **argv) {
 	 
 	*/
 	
-	int res = 0;		// result, function return value
+	res = 0;		// result, function return value
 	char ln[6];			// line number string placeholder
 	lineptr = 0;		// initialize position in buffer
 	run_clear();		// set numeric vars to 0 at start
@@ -342,7 +372,11 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 	DataPosition = 0;	// start at beginning of data list
-
+	if (pos == 0) {		// nothing to run!
+		printf("Buffer empty.\n");
+		LOADFLAG=0;
+		goto runloop;
+	}
 
 parseLoop:
 	memset(line,0,LINESIZE);
@@ -371,20 +405,24 @@ parseLoop:
 	/* test return code */
 	if (res == -998) {				// STOP statement
 		printf("STOPPED in line %d\n",currentlinenumber);
-		free(buffer);
-		free(DataStorage);
+		printf("Ready.\n");
+		if (LOADFLAG==0) goto runloop;
+		free(buffer); free(DataStorage);
 		exit(0);
 	}
 	if (res == -999) {				// END Statement
 		printf("END statement in line %d\n",currentlinenumber);
-		free(buffer);
-		free(DataStorage);
-		exit (0);
+		printf("Ready.\n");
+		if (LOADFLAG==0) goto runloop;
+		free(buffer); free(DataStorage);
+		exit(0);
 	}
 	if (res == -1) {				// parse returned an error
 		printf("Error in line %d\n",currentlinenumber);
 		free(buffer);
 		free(DataStorage);
+		if (LOADFLAG==0) goto runloop;
+		free(buffer); free(DataStorage);
 		exit(0);
 	}
 	if (res > 0) {					// goto/gosub statement returns new line number
@@ -402,10 +440,9 @@ parseLoop:
 	// get next line
 	lineptr += (n+1);
 	if (lineptr >= pos-1) {		// end of file reached
-		printf("End of file reached\n");
-		free(buffer);
-		free(DataStorage);
-		exit(0);
+		printf("End of buffer reached\n");
+		LOADFLAG=0;
+		goto runloop;
 	}
 	goto parseLoop;				// continue with basic program
 

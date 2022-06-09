@@ -1,7 +1,8 @@
 all:	basic.o print.o input.o goto.o gosub.o math.o let.o \
-		ifthen.o fornext.o data.o def.o
+		ifthen.o fornext.o data.o def.o insert.o loadsave.o
 	$(CC) $(FLAGS) -o dbasic basic.o print.o input.o goto.o gosub.o \
-		math.o let.o ifthen.o fornext.o data.o def.o $(LIBS)
+		math.o let.o ifthen.o fornext.o data.o def.o \
+		insert.o loadsave.o $(LIBS)
 
 clean:	
 	/bin/rm -f *.o
@@ -50,4 +51,11 @@ data.o	:	data.c
 
 def.o	:	def.c
 	$(CC) $(FLAGS) -c def.c
+
+insert.o	:	insert.c
+	$(CC) $(FLAGS) -c insert.c
+
+loadsave.o	:	loadsave.c
+	$(CC) $(FLAGS) -c loadsave.c
+
 

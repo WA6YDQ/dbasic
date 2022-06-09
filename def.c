@@ -25,35 +25,27 @@ int def(char *line) {
 		if (defchar >= 'a' && defchar <= 'z') {
 			int n=0; 
 			line += 3;		// skip fna
-			while (*line != '"') {
-				if (*line == '\0' || *line == '\n') break;
-				line++;
-			}
-			line++;		// point past initial "
-			// did we break at EOL?
-			if (*line == '\0' || *line == '\n') {
-				printf("Error - missing function defination\n");
-				return -1;
-			}
-			// get all between " " as the function rule
-			//printf("def: loading the eqn\n");
+			// get all up to \0 or \n, save to fnx string
 			while (1) {
-				if (*line == '\0' || *line == '\n') {
-					printf("Error - missing closing quote in funct def\n");
-					return -1;
+				if (*line == '\0' || *line == '\n') break;
+				if (*line == '"') {			// ignore ""
+					line++;
+					continue;
 				}
-				if (*line == '"') break;
 				fn[defchar-'a'][n] = *line;
 				line++; n++;
-				if (n>80) {
-					printf("Error - definition too long\n");
+				if (n>sizeof(fn[defchar-'a'])) {
+					printf("Error - function is too long\n");
 					return -1;
 				}
 			}
-			//printf("def: finished loading. n=%d\n",n);
-			fn[defchar-'a'][n] = '\0';
-			//printf("new def: fn%c=[%s]\n",defchar,fn[defchar-'a']);
-			return 0;
+			if (n==0) {
+				printf("Error - missing function definition");
+				return -1;
+			}
+
+			return 0;		// normal end
+
 		}
 		printf("Error - bad function name\n");
 		return -1;
