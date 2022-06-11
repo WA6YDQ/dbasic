@@ -118,7 +118,7 @@ float eval(char *expr) {
 		}
 
 		/* test for user-defined functions (fn[a..z]) */
-		if (strlen(expr) > 4) {
+		if (strlen(expr) == 3) {
 			if (*expr == 'f' && *(expr+1) == 'n' && (*(expr+2) >= 'a' && *(expr+2) <= 'z')) {
 				char fnchar = *(expr+2);
 				char *tmpfn = fn[fnchar - 'a'];
@@ -132,7 +132,7 @@ float eval(char *expr) {
 
 
 		/* test for math function (sin, tan, sqr, etc.) */
-		if (strlen(expr) > 5) {
+		if (strlen(expr) >= 5) {
 			if (isalpha(*expr) && isalpha(*(expr+1))) {
 				int n=0;
 				memset(funcname,0,sizeof(funcname));
