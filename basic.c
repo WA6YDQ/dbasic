@@ -173,11 +173,7 @@ int parse(char *line) {
 	
 	if (strcmp(word,"print")==0) {		// print.c
 		res = run_print(line);
-		if (res != 0) {
-			printf("line %s\n",linenum);
-			return -1;
-		}
-		return 0;
+		return res;
 	}
 	if (strcmp(word,"input")==0) {		// input.c
 		run_input(line);
@@ -427,8 +423,6 @@ parseLoop:
 	}
 	if (res == -1) {				// parse returned an error
 		printf("Error in line %d\n",currentlinenumber);
-		free(buffer);
-		free(DataStorage);
 		if (LOADFLAG==0) goto runloop;
 		free(buffer); free(DataStorage);
 		exit(0);
