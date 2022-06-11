@@ -4,12 +4,11 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-
+#include "dbasic.h"
 
 int run_let(char *line) {
 
 	float eval(char *);
-	//extern int NumericVars[];
 	extern float NumericVars[];
 	extern char CharVars[][80];
 
@@ -17,9 +16,10 @@ int run_let(char *line) {
 
 	while (isdigit(*line)) line++;  	// skip line number
 	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
-	while (isalpha(*line)) line++;	// skip LET
+	while (isalpha(*line)) line++;	// skip LET keyword
 
 	/* format: 100 LET a=5, b=a*10+3, a$="this is a test"\n\0 */
+
 	while (1) {
 		if (*line == '\0') return 0;		// EOL
 		if (*line == ',') {					// comma seperator
@@ -73,7 +73,7 @@ int run_let(char *line) {
 		/* test numeric variable */
 		if (*line >= 'a' && *line <= 'z') {
 			char usevar = *line;
-			char expr[40]; memset(expr,0,sizeof(expr)); int n=0;
+			char expr[LINESIZE]; memset(expr,0,LINESIZE); int n=0;
 			line++;		// skip variable
 			if (isblank(*line)) while (isblank(*line)) line++;
 			if (*line != '=') {
@@ -82,11 +82,11 @@ int run_let(char *line) {
 			}
 			line++;		// got =  skip it
 			while (1) {
-				if (*line == ',' || *line == '\0') break;
+				if (*line == ',' || *line == '\0' || *line == '\n') break;
 				if (isblank(*line)) while (isblank(*line)) line++;
 				expr[n] = *line;
 				n++; line++;
-				if (n>=40) {
+				if (n>=LINESIZE) {
 					printf("Error - expression too long\n");
 					return -1;
 				}

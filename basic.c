@@ -18,7 +18,7 @@
  Case is preserved when between double quotes ""
 
  TODO: 
- keywords: ON/GOSUB, DEF(), FOPEN(), FCLOSE(), FREAD(), 
+ keywords: ON/GOSUB, FOPEN(), FCLOSE(), FREAD(), 
  FWRITE(), RANDOM(IZE)
  string functions: LEFT$(), MID$(), RIGHT$()
  math functions: INT(), RND(), SGN()
@@ -37,7 +37,7 @@
 #include "dbasic.h"
 
 
-/* globals */
+/* global variables */
 char *buffer;					// memory buffer holding the basic program
 //int NumericVars[26];			// numeric integer variables a-z
 float NumericVars[26];
@@ -55,6 +55,7 @@ float *DataStorage;				// DATA statement storage, will assign later
 int DataStorageMax=0;			// max number of data elements
 int DataPosition=0;				// position of read data objects
 char fn[26][80]={};				// function definitions
+int error = 0;					// used by eval(), 0 is OK, -1 is expression error
 
 /* extern functions */
 int parse(char *);
@@ -130,9 +131,9 @@ gsrloop:
 /******************** PARSE *************************/
 /* read a line, parse it and execute basic commands */
 /* normal commands return a 0                       */
-/* end returns -999                                 */
+/* end returns -999, stop returns -998              */
 /* goto/gosubs return a line number                 */
-/* (0 and -1 are bad line numbers)                  */
+/* -1 is an error, 0 is normal return               */
 /****************************************************/
 
 int parse(char *line) {
@@ -166,7 +167,8 @@ int parse(char *line) {
 
 	if (strcmp(word,"let")==0) {		// let.c
 		res = run_let(line);
-		return res;
+		if (error == 0) return res;
+		return -1;
 	}
 	
 	if (strcmp(word,"print")==0) {		// print.c
@@ -210,10 +212,9 @@ int parse(char *line) {
 		char linen[6];
 		sscanf(tmpline,"%s",linen);		// get line number of next line
 		returnlinenumber = atoi(linen);
-		return run_gosub(line);			// return the line number
+		return run_goto(line);			// return the line number (goto/gosub functionally same)
 	}
 	if (strcmp(word,"return")==0) {		// return from subroutine
-		//printf("return: retline is %d\n",returnlinenumber);
 		return returnlinenumber;
 	}
 	if (strcmp(word,"if")==0) {			// IF/THEN: ifthen.c
@@ -229,11 +230,9 @@ int parse(char *line) {
 			if (tmpline[x]=='\n') break;
 			x++;
 		}
-		//printf("for: next line [%s]\n",tmpline);
 		char linen[6];
 		sscanf(tmpline,"%s",linen);
 		forlinenumber = atoi(linen);
-		//printf("for: forlinenumber = %d\n",forlinenumber);
 		return run_for(line);
 	}
 	if (strcmp(word,"next")==0) {		// for/next  fornext.c
@@ -294,9 +293,11 @@ int main(int argc, char **argv) {
 	
 	
 
-	/**************************************************************/
-	/* this is the user interface when the program is not running */
-	/**************************************************************/
+	/******************************************************************/
+	/* this is the user interface when the interpreter is not running */
+	/*                                                                */
+	/*    commands: exit, quit, list, free, new, load, save, run      */
+	/******************************************************************/
 
 runloop:
 	fgets(line,LINESIZE,stdin);
@@ -340,9 +341,8 @@ runloop:
 		goto runloop;
 	}
 	// not a command,
-	// save the line, replace or delete if just line num entered
+	// replace, delete or save the entered line
 	if (line[0] == '\n') goto runloop;		// ignore empty lines
-	
 	insert(line);
 	goto runloop;
 
@@ -401,7 +401,15 @@ parseLoop:
 	
 	/* parse the BASIC statements, execute them */
 	res = parse(line);
-	
+
+	/* test eval errors */
+	if (error == -1) {
+		printf("Error - expression error in %d [%s]\n",currentlinenumber,line);
+		LOADFLAG=0;
+		printf("Ready.\n");
+		goto runloop;
+	}
+
 	/* test return code */
 	if (res == -998) {				// STOP statement
 		printf("STOPPED in line %d\n",currentlinenumber);
@@ -440,7 +448,7 @@ parseLoop:
 	// get next line
 	lineptr += (n+1);
 	if (lineptr >= pos-1) {		// end of file reached
-		printf("End of buffer reached\n");
+		printf("End of buffer reached\nReady.\n");
 		LOADFLAG=0;
 		goto runloop;
 	}

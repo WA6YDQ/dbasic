@@ -8,17 +8,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "dbasic.h"
+
 
 int run_ifthen(char *line) {
 
 	float eval(char *);
 	float lvalue=0, rvalue=0, linenum=0;
 	int n=0;
-	char expr[40] = {};					// expression for eval()
+	char expr[LINESIZE] = {};					// expression for eval()
+	
 	//printf("line is [%s]\n",line);
 	
 	while (isdigit(*line)) line++;		// skip line number
-	while (isblank(*line)) line++;		// and spaces
+	if (isblank(*line)) while (isblank(*line)) line++;		// and spaces
 	while (isalpha(*line)) line++;		// and LET statement
 	while (!isalpha(*line)) line++;		// skip spaces until 1st variable
 
@@ -28,7 +31,7 @@ int run_ifthen(char *line) {
 		if (isblank(*line)) break;
 		expr[n] = *line;
 		n++; line++;
-		if (n >= 40) {					// expression too long
+		if (n >= LINESIZE) {					// expression too long
 			printf("Error - expression too long\n");
 			return -1;
 		}
@@ -39,7 +42,7 @@ int run_ifthen(char *line) {
 	/* get test variable */
 	int testchar = 0;
 	// skip any spaces
-	if (*line == ' ') while (isblank(*line)) line++;
+	if (isblank(*line)) while (isblank(*line)) line++;
 	if (*line == '<' && *(line+1)==' ') {
 		testchar = 1;	// less than
 		line += 1;
@@ -82,7 +85,7 @@ int run_ifthen(char *line) {
 		if (isblank(*line)) break;
 		expr[n] = *line;
 		n++; line++;
-		if (n >= 40) {					// expression too long
+		if (n >= LINESIZE) {					// expression too long
 			printf("Error - expression too long\n");
 			return -1;
 		}
@@ -108,7 +111,7 @@ int run_ifthen(char *line) {
 		if (*line == '\n') break;
 		if (*line == '\0') break;
 		n++; line++;
-		if (n > 40) {					// expression too long
+		if (n > LINESIZE) {					// expression too long
 			printf("Error - expression too long\n");
 			return -1;
 		}

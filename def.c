@@ -4,17 +4,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "dbasic.h"
 
 int def(char *line) {
 
-	/* format: 100 def fna = "2*x+sin(5)"
+	/* format: 100 def fna 1/(2*3.14156*sqr(l*c))
 	 * This routine assigns the quoted formula to a 
 	 * pre-defined string. When eval() encounters df{a..z}
 	 * it evaluates the string and returns the result.
 	 */
 
-	extern char fn[26][80];		// function goes inside here
-	//printf("def: line=[%s]\n",line);
+	extern char fn[26][LINESIZE];		// function goes inside here
 	while (isdigit(*line)) line++;		// skip line number
 	if (isblank(*line)) while (isblank(*line)) line++;
 	while (isalpha(*line)) line++;		// skip 'def'
@@ -24,7 +24,7 @@ int def(char *line) {
 		char defchar = *(line+2);		// a..z
 		if (defchar >= 'a' && defchar <= 'z') {
 			int n=0; 
-			line += 3;		// skip fna
+			line += 3;		// skip 3 chars of fnx
 			// get all up to \0 or \n, save to fnx string
 			while (1) {
 				if (*line == '\0' || *line == '\n') break;

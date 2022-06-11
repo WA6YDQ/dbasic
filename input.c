@@ -4,12 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "dbasic.h"
 
 int run_input(char *line) {
 	extern float NumericVars[];
-	extern char CharVars[][80];
-	char getline[20];
-	
+	extern char CharVars[][LINESIZE];
+	char getline[LINESIZE];
+	float eval(char *);
+
 	//printf("INPUT: %s\n",line);
 
 	while (isdigit(*line)) line++;		// skip line number
@@ -35,6 +37,10 @@ int run_input(char *line) {
 		if (*line == '"') {
 			line++;				// skip initial "
 			while (1) {
+				if (*line == '\0' || *line == '\n') {
+					printf("Error - missing double quote\n");
+					return -1;
+				}
 				if (*line == '"') break;
 				printf("%c",*line++);
 			}
@@ -45,10 +51,9 @@ int run_input(char *line) {
 		/* if a$-z$ get string input */
 		if (*line >= 'a' && *line <= 'z' && *(line+1) == '$') {
 			char strvar = *line;		// get variable
-			//printf("input: var is %c\n",strvar);
 			memset(CharVars[strvar-'a'],0,sizeof(CharVars[strvar-'a']));
 			printf("?");
-			fgets(getline,80,stdin);
+			fgets(getline,LINESIZE,stdin);
 			getline[strlen(getline)-1] = '\0';		// strip off \n
 			strcpy(CharVars[strvar-'a'],getline);
 			line += 2;
@@ -60,8 +65,8 @@ int run_input(char *line) {
 		/* if a-z get numeric input */
 		if (*line >= 'a' && *line <= 'z') {
 			printf("?");
-			fgets(getline,20,stdin);
-			NumericVars[*line-'a'] = atof(getline);
+			fgets(getline,20,stdin);		// 20 chars max for digits
+			NumericVars[*line-'a'] = eval(getline);		// was atof(getline);
 			line++;
 			continue;
 		}

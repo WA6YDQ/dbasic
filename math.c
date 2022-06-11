@@ -24,6 +24,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include "dbasic.h"
 
 #define STACKMAX 20
 
@@ -83,12 +84,16 @@ float eval(char *expr) {
 	char funcname[20] = {};
 	char funcval[40] = {};
 
+	extern int error;		// 0 if OK, -1 on error. 
+
 	/* initialize storage */
 	for (int n=0; n<STACKMAX; n++) val[n]=0;
 	for (int n=0; n<STACKMAX; n++) mathchr[n]='\0';
 
 	// debugging
 	// printf("eval: expression: [%s]\n",expr);
+
+	error = 0;		// initialize on entry
 
 	while (1) {
 
@@ -113,86 +118,91 @@ float eval(char *expr) {
 		}
 
 		/* test for user-defined functions (fn[a..z]) */
-		if (*expr == 'f' && *(expr+1) == 'n' && (*(expr+2) >= 'a' && *(expr+2) <= 'z')) {
-			char fnchar = *(expr+2);
-			char *tmpfn = fn[fnchar - 'a'];
-			expr += 3;
-			float res = eval(tmpfn);
-			val[valpos] = res;
-			valpos++;
-			continue;
+		if (strlen(expr) > 4) {
+			if (*expr == 'f' && *(expr+1) == 'n' && (*(expr+2) >= 'a' && *(expr+2) <= 'z')) {
+				char fnchar = *(expr+2);
+				char *tmpfn = fn[fnchar - 'a'];
+				expr += 3;
+				float res = eval(tmpfn);
+				val[valpos] = res;
+				valpos++;
+				continue;
+			}
 		}
 
 
 		/* test for math function (sin, tan, sqr, etc.) */
-		if (isalpha(*expr) && isalpha(*(expr+1))) {
-			int n=0;
-			memset(funcname,0,sizeof(funcname));
-			// get the name of the function up to ( 
-			while (1) {
-				if (*expr == '(') break;
-				funcname[n] = *expr;
-				expr++; n++;
-			}
-			expr++;		// skip initial (
-			// now get value inside ()
-			n=0;
-			memset(funcval,0,sizeof(funcval));
-			while (1) {
-				if (n > sizeof(funcval)) break;
-				if (*expr == ')') break;
-				funcval[n] = *expr;
-				expr++; n++;
-			}
-			expr++;		// skip ending )
-			float tvalue = eval(funcval);
-			float fvalue = 0;
-			/* now see what the function is */
-			/* SQR() */
-			if (strncmp(funcname,"sqr",3)==0) {
-				fvalue = sqrtf(tvalue);
-				goto funcend;
-			}
-			/* NOTE: All trig functions are in radians */
-			/* SIN() */
-			if (strncmp(funcname,"sin",3)==0) {
-				fvalue = sinf(tvalue);
-				goto funcend;
-			}
-			/* COS()  */
-			if (strncmp(funcname,"cos",3)==0) {
-				fvalue = cosf(tvalue);
-				goto funcend;
-			}
-			/* TAN()  */
-			if (strncmp(funcname,"tan",3)==0) {
-				fvalue = tanf(tvalue);
-				goto funcend;
-			}
-			/* EXP()  */
-			if (strncmp(funcname,"exp",3)==0) {
-				fvalue = expf(tvalue);
-				goto funcend;
-			}
-			/* LOG()  (base 10) log(42)=1.6232 */
-			if (strncmp(funcname,"log",3)==0) {
-				fvalue = log10f(tvalue);
-				goto funcend;
-			}
-			/* LN() natural log, ln(42)=3.7377 */
-			if (strncmp(funcname,"ln",2)==0) {
-				fvalue = logf(tvalue);
-				goto funcend;
-			}
+		if (strlen(expr) > 5) {
+			if (isalpha(*expr) && isalpha(*(expr+1))) {
+				int n=0;
+				memset(funcname,0,sizeof(funcname));
+				// get the name of the function up to ( 
+				while (1) {
+					if (*expr == '(') break;
+					funcname[n] = *expr;
+					expr++; n++;
+				}
+				expr++;		// skip initial (
+				// now get value inside ()
+				n=0;
+				memset(funcval,0,sizeof(funcval));
+				while (1) {
+					if (n > sizeof(funcval)) break;
+					if (*expr == ')') break;
+					funcval[n] = *expr;
+					expr++; n++;
+				}
+				expr++;		// skip ending )
+				float tvalue = eval(funcval);
+				float fvalue = 0;
+				/* now see what the function is */
+				/* SQR() */
+				if (strncmp(funcname,"sqr",3)==0) {
+					fvalue = sqrtf(tvalue);
+					goto funcend;
+				}
+				/* NOTE: All trig functions are in radians */
+				/* SIN() */
+				if (strncmp(funcname,"sin",3)==0) {
+					fvalue = sinf(tvalue);
+					goto funcend;
+				}
+				/* COS()  */
+				if (strncmp(funcname,"cos",3)==0) {
+					fvalue = cosf(tvalue);
+					goto funcend;
+				}
+				/* TAN()  */
+				if (strncmp(funcname,"tan",3)==0) {
+					fvalue = tanf(tvalue);
+					goto funcend;
+				}
+				/* EXP()  */
+				if (strncmp(funcname,"exp",3)==0) {
+					fvalue = expf(tvalue);
+					goto funcend;
+				}
+				/* LOG()  (base 10) log(42)=1.6232 */
+				if (strncmp(funcname,"log",3)==0) {
+					fvalue = log10f(tvalue);
+					goto funcend;
+				}
+				/* LN() natural log, ln(42)=3.7377 */
+				if (strncmp(funcname,"ln",2)==0) {
+					fvalue = logf(tvalue);
+					goto funcend;
+				}
 			
-			// not a recognized function
-			printf("Error - %s not a recognized function\n",funcname);
-			exit(1);
-			// put function result in list
-			funcend:
-			val[valpos] = fvalue;
-			valpos++;
-			continue;
+				// not a recognized function
+				printf("Error - %s not a recognized function\n",funcname);
+				error = -1;
+				return error;
+				// put function result in list
+				funcend:
+				val[valpos] = fvalue;
+				valpos++;
+				continue;
+			}
 		}
 
 		/* at EOL break from this loop and calculate expression */
@@ -210,9 +220,9 @@ float eval(char *expr) {
 		}
 
 
-		/* save arithmetic chars in their own set of variables */
+		/* save arithmetic operands in their own set of variables */
 		if (ismathchar(*expr)) {
-            if (*expr == '*' && *(expr+1) == '*') {
+			if (*expr == '*' && *(expr+1) == '*') {
                 mathchr[mathchrpos++] = 'E';
                 expr += 2;
             } else {
@@ -258,7 +268,7 @@ float eval(char *expr) {
 
 		/* see if expression is enclosed by parenthesis: group them and eval */
         if (*expr == '(') {
-            expr++;         // skip opening parens
+			expr++;         // skip opening parens
             int n=0; char temp[80]; 
 			memset(temp,0,sizeof(temp));
             int parencount=1;
@@ -279,8 +289,11 @@ float eval(char *expr) {
 
 		/* undefined character in expression */	
 		printf("eval: unknown char '%c' in expression.\n",*expr);
-		expr += 1;
-		continue;
+		error = -1;
+		return error;
+
+		//expr += 1;
+		//continue;
 
 	
 
@@ -296,6 +309,14 @@ float eval(char *expr) {
 	*/
 
 	int i=0, FLAG=0; float res=0; int n=0;
+	
+	/* error checking */
+	if (mathchrpos == 1 && valpos > 2) {
+		error = -1;
+		return error;
+	}
+
+
 
 	/* order of precidence for arithmetic operators */
 	char oper[] = {'E','E','*','/','+','-','&','|','^','^'};

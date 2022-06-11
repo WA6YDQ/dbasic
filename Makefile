@@ -1,6 +1,6 @@
-all:	basic.o print.o input.o goto.o gosub.o math.o let.o \
+all:	basic.o print.o input.o goto.o math.o let.o \
 		ifthen.o fornext.o data.o def.o insert.o loadsave.o
-	$(CC) $(FLAGS) -o dbasic basic.o print.o input.o goto.o gosub.o \
+	$(CC) $(FLAGS) -o dbasic basic.o print.o input.o goto.o \
 		math.o let.o ifthen.o fornext.o data.o def.o \
 		insert.o loadsave.o $(LIBS)
 
@@ -26,8 +26,8 @@ input.o	:	input.c
 goto.o	:	goto.c
 	$(CC) $(FLAGS) -c goto.c
 
-gosub.o	:	gosub.c
-	$(CC) $(FLAGS) -c gosub.c
+#gosub.o	:	gosub.c
+#	$(CC) $(FLAGS) -c gosub.c
 
 # the functions in eval.c are depreciated
 # in favor of the functioons in math.c
