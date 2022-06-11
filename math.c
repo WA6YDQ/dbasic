@@ -347,3 +347,162 @@ float eval(char *expr) {
 
 	/* end of eval() */
 }
+
+
+/* evaluate string expressions */
+char *evalstring(char *line) {
+
+	extern char tempCharVar[LINESIZE];
+	extern char CharVars[26][LINESIZE];
+	extern int error;
+	error = 0;
+	char temp[LINESIZE]={};
+	int n=0;
+	while (1) {
+		if (*line == '(') break;	// get function until (
+		temp[n] = *line;
+		n++; line++;
+	}
+
+	/* LEFT$(X$,C) */
+	if (strncmp(temp,"left$",5)==0) {
+		// left$(a$,3)
+		line++;		// skip (
+		if (!(*line >= 'a' && *line <= 'a' && *(line+1) == '$')) {
+			printf("Error - expected character variable in left$()\n");
+				error = -1;
+				return "";
+		}
+		char strchr = *line;
+		line += 2;	// skip x$
+		if (*line != ',') {
+			printf("Error - expected seperator char in left$(). Got %c\n",*line);
+			error = -1;
+			return "";
+		}
+		line++;		// skip ,
+		char tmpnum[LINESIZE]={}; n=0;
+		while (1) {
+			if (*line == ')') break;	// get number between ,)
+			if (*line == '\0') {
+				printf("Error - bad expression in left$()\n");
+				error = -1;
+				return "";
+			}
+			tmpnum[n] = *line;
+			n++; line++;
+		}
+		int val = atoi(tmpnum);
+		if (val == 0) 
+			return "";
+		// get chars from 0 thru tmpnum
+		memset(tempCharVar,0,LINESIZE);
+		n=0;
+		while (n < val) {
+			tempCharVar[n] = CharVars[strchr-'a'][n];
+			n++;
+		}
+		return tempCharVar;
+	}
+
+	/* RIGHT$(X$,C) */
+	if (strncmp(temp,"right$",6)==0) {
+        // right$(a$,3)
+        line++;     // skip (
+        if (!(*line >= 'a' && *line <= 'a' && *(line+1) == '$')) {
+            printf("Error - expected character variable in right$()\n");
+                error = -1;
+                return "";
+        }
+        char strchr = *line;
+        line += 2;  // skip x$
+        if (*line != ',') {
+            printf("Error - expected seperator char in right$(). Got %c\n",*line);
+            error = -1; 
+            return ""; 
+        }
+        line++;     // skip ,
+        char tmpnum[LINESIZE]={}; n=0;
+        while (1) {
+            if (*line == ')') break;    // get number between ,)
+            if (*line == '\0') {
+                printf("Error - bad expression in right$()\n");
+                error = -1; 
+                return ""; 
+            }
+            tmpnum[n] = *line;
+            n++; line++;
+        }
+        int val = atoi(tmpnum);
+        if (val == 0)  
+            return ""; 
+		// get the last (val) chars of x$
+        memset(tempCharVar,0,LINESIZE);
+        n=strlen(CharVars[strchr-'a']); 
+		val=n-val;
+		int cnt=0;
+        while (val < n) {
+            tempCharVar[cnt++] = CharVars[strchr-'a'][val++];
+        }
+        return tempCharVar;
+    }
+
+	/* MID$(X$,S,C) */
+	if (strncmp(temp,"mid$",4)==0) {
+        // mid$(a$,3,2)		starting at pos 3 for 2 chars
+		int startnum,countnum;
+		char tmpnum[LINESIZE];
+        line++;     // skip (
+        if (!(*line >= 'a' && *line <= 'a' && *(line+1) == '$')) {
+            printf("Error - expected character variable in mid$()\n");
+                error = -1;
+                return "";
+        }
+        char strchr = *line;
+        line += 2;  // skip x$
+        if (*line != ',') {
+            printf("Error - expected seperator char in mid$(). Got %c\n",*line);
+            error = -1;
+            return "";
+        }
+        line++;     // skip ,
+        // get startnum
+		memset(tmpnum,0,LINESIZE); n=0;
+        while (1) {
+            if (*line == ',') break;    // get number between ,)
+            if (*line == '\0') {
+                printf("Error - bad expression in mid$(): startchar\n");
+                error = -1;
+                return "";
+            }
+            tmpnum[n] = *line;
+            n++; line++;
+        }
+        startnum = atoi(tmpnum); startnum -= 1;	// really starts at 0
+		line++;		// skip ,
+		// get countnum
+		memset(tmpnum,0,LINESIZE); n=0;
+		while (1) {
+            if (*line == ')') break;    // get number between ,)
+            if (*line == '\0') {
+                printf("Error - bad expression in mid$(): countchar\n");
+                error = -1;
+                return "";
+            }
+            tmpnum[n] = *line;
+            n++; line++;
+        }
+		countnum = atoi(tmpnum);
+        if (startnum == 0 || countnum == 0) return "";
+        // get start pos, count number of chars of x$
+		if (startnum >= strlen(CharVars[strchr-'a'])) return "";
+		if (startnum+countnum >= strlen(CharVars[strchr-'a'])) return "";
+        memset(tempCharVar,0,LINESIZE); n=0;
+		for (int x=startnum; x<(startnum+countnum); x++) 
+				tempCharVar[n++] = CharVars[strchr-'a'][x];
+        return tempCharVar;
+    }
+
+	error = -1;
+	return "";
+}

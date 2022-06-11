@@ -56,6 +56,7 @@ int DataStorageMax=0;			// max number of data elements
 int DataPosition=0;				// position of read data objects
 char fn[26][80]={};				// function definitions
 int error = 0;					// used by eval(), 0 is OK, -1 is expression error
+char tempCharVar[LINESIZE];		// used in evalstring()
 
 /* extern functions */
 int parse(char *);
@@ -377,7 +378,7 @@ runit:
 parseLoop:
 	memset(line,0,LINESIZE);
 	n=0;
-	res = 0;
+	res = 0; error = 0;
 	while (1) {
 		/* extract a single line from the buffer */
 		line[n] = buffer[lineptr+n];

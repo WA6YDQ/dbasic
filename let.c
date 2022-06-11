@@ -11,6 +11,8 @@ int run_let(char *line) {
 	float eval(char *);
 	extern float NumericVars[];
 	extern char CharVars[][80];
+	extern char *evalstring(char *);
+	//extern char tempCharVar[LINESIZE];
 
 	//printf("let:line=[%s]\n",line);
 
@@ -49,7 +51,7 @@ int run_let(char *line) {
 				continue;
 			}
 		
-			/* test for " */
+			/* everything between double quotes */
 			if (*line == '"') {
 				line++;		// skip "
 				int n=0;
@@ -65,9 +67,21 @@ int run_let(char *line) {
 				continue;
 			}
 
-			printf("LET: unknown char in string %c\n",*line);
-			line++;
+			/* test string functions: left$, mid$, right$, etc */
+			char temp[LINESIZE]={}; int n=0;
+			while (1) {
+				if (*line == '\0' ) break;
+				if (*line == ',' && *(line+1) == ' ') break;	// seperator btwn assignments
+				temp[n] = *line;
+				n++; line++;
+				if (n > LINESIZE) {
+					printf("Error - line too long\n");
+					return -1;
+				}
+			}
+			strcpy(CharVars[strvar-'a'],evalstring(temp));
 			continue;
+
 		}
 
 		/* test numeric variable */
