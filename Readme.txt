@@ -65,10 +65,10 @@ Results in:
 f=1.32696e+07
 
 All expressions are algabraic in order:
-Powers have the highest priority (2**8(
-Next is multiplication and division (3*6/4)
-Then is addition and subtraction (4+5 - 3+9)
-Expressions in parens have priority: 
+Powers have the highest priority: 2**8
+Next is multiplication and division: 3*6/4
+Then is addition and subtraction: 4+5-3+9
+Expressions in parens have priority: (a+b)*c 
 (a+b)*c is different from a+b*c. Parens can be nested.
 Lowest priority are logical functions (&, |, ^) 
 
