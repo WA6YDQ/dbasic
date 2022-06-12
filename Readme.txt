@@ -40,7 +40,8 @@ END, IF/THEN, FOR/NEXT/STEP, INPUT,
 DATA, READ, RESTORE, CLEAR, STOP, DEF FNx
 
 The following functions are valid:
-SIN(), COS(), TAN(), EXP(), LOG(), LN(), SQR() 
+SIN(), COS(), TAN(), EXP(), LOG(), LN(), SQR(),
+LEFT$(), MID$(), RIGHT$(), ASC(), CHR$(), FNx
 (Note: LOG() is base 10, LN() is natural log
 like my calculator shows)
 
@@ -63,10 +64,13 @@ An example:
 Results in:
 f=1.32696e+07
 
-All expressions are algabraic in order (*/ have
-precidence over +-). Expressions in parens have priority: 
+All expressions are algabraic in order:
+Powers have the highest priority (2**8(
+Next is multiplication and division (3*6/4)
+Then is addition and subtraction (4+5 - 3+9)
+Expressions in parens have priority: 
 (a+b)*c is different from a+b*c. Parens can be nested.
- 
+Lowest priority are logical functions (&, |, ^) 
 
 There are basic program examples for each keyword. See the
 file *.bas in the examples directory of this repository.
