@@ -72,6 +72,7 @@ float eval(char *expr) {
 
 	extern float NumericVars[];
 	extern char fn[26][80];
+	extern char CharVars[26][LINESIZE];
 
 	int NEGFLAG=0;		// true when unary - found
 	//int MATHFLAG=0;		// true when pending math operation
@@ -118,7 +119,7 @@ float eval(char *expr) {
 		}
 
 		/* test for user-defined functions (fn[a..z]) */
-		if (strlen(expr) == 3) {
+		if (strlen(expr) >= 3) {
 			if (*expr == 'f' && *(expr+1) == 'n' && (*(expr+2) >= 'a' && *(expr+2) <= 'z')) {
 				char fnchar = *(expr+2);
 				char *tmpfn = fn[fnchar - 'a'];
@@ -153,48 +154,67 @@ float eval(char *expr) {
 					expr++; n++;
 				}
 				expr++;		// skip ending )
-				float tvalue = eval(funcval);
 				float fvalue = 0;
 				/* now see what the function is */
 				/* SQR() */
 				if (strncmp(funcname,"sqr",3)==0) {
+					float tvalue = eval(funcval);
 					fvalue = sqrtf(tvalue);
 					goto funcend;
 				}
 				/* NOTE: All trig functions are in radians */
 				/* SIN() */
 				if (strncmp(funcname,"sin",3)==0) {
+					float tvalue = eval(funcval);
 					fvalue = sinf(tvalue);
 					goto funcend;
 				}
 				/* COS()  */
 				if (strncmp(funcname,"cos",3)==0) {
+					float tvalue = eval(funcval);
 					fvalue = cosf(tvalue);
 					goto funcend;
 				}
 				/* TAN()  */
 				if (strncmp(funcname,"tan",3)==0) {
+					float tvalue = eval(funcval);
 					fvalue = tanf(tvalue);
 					goto funcend;
 				}
 				/* EXP()  */
 				if (strncmp(funcname,"exp",3)==0) {
+					float tvalue = eval(funcval);
 					fvalue = expf(tvalue);
 					goto funcend;
 				}
 				/* LOG()  (base 10) log(42)=1.6232 */
 				if (strncmp(funcname,"log",3)==0) {
+					float tvalue = eval(funcval);
 					fvalue = log10f(tvalue);
 					goto funcend;
 				}
 				/* LN() natural log, ln(42)=3.7377 */
 				if (strncmp(funcname,"ln",2)==0) {
+					float tvalue = eval(funcval);
 					fvalue = logf(tvalue);
 					goto funcend;
 				}
-			
+				/* ASC() return ascii number of supplied character */
+				if (strncmp(funcname,"asc",3)==0) {
+					if (funcval[0]=='"' && funcval[2]=='"') {
+						fvalue =  (char)funcval[1];
+						goto funcend;
+					}
+					if (funcval[0] >= 'a' && funcval[0] <= 'z' && funcval[1] == '$') {
+						fvalue = (char)CharVars[funcval[0]-'a'][0];
+						goto funcend;
+					}
+					fvalue = 0;
+					goto funcend;
+				}
+				
 				// not a recognized function
-				printf("Error - %s not a recognized function\n",funcname);
+				printf("Error - unknown numeric function %s\n",funcname);
 				error = -1;
 				return error;
 				// put function result in list
@@ -206,7 +226,9 @@ float eval(char *expr) {
 		}
 
 		/* at EOL break from this loop and calculate expression */
-		if (*expr == '\0' || *expr == '\n') break;
+		if (*expr == '\0' || *expr == '\n') {
+			break;
+		}
 
 		/* test unary - */
 		/* NOTE: to assign a negitive value the unary - must
@@ -309,7 +331,8 @@ float eval(char *expr) {
 	*/
 
 	int i=0, FLAG=0; float res=0; int n=0;
-	
+
+
 	/* error checking */
 	if (mathchrpos == 1 && valpos > 2) {
 		error = -1;
@@ -356,6 +379,7 @@ char *evalstring(char *line) {
 	extern char CharVars[26][LINESIZE];
 	extern int error;
 	error = 0;
+	extern float NumericVars[26];
 	char temp[LINESIZE]={};
 	int n=0;
 	while (1) {
@@ -503,6 +527,35 @@ char *evalstring(char *line) {
         return tempCharVar;
     }
 
+	/* chr$() return char based on value: v$=chr$(65) */
+	if (strncmp(temp,"chr$",4)==0) {
+		line++;		// skip (
+		// test if variable a-z
+		if (*line >= 'a' && *line <= 'z' && *(line+1) == ')') {		// numeric var
+			memset(tempCharVar,0,LINESIZE);
+			tempCharVar[0] = (char)NumericVars[*line-'a'];
+			return tempCharVar;
+		}
+		// test if number
+		char tmpnum[LINESIZE];
+		memset(tmpnum,0,LINESIZE);
+		memset(tempCharVar,0,LINESIZE);
+		n=0; 
+		while (1) {
+			printf("chr %c ",*line);
+			if (!isdigit(*line)) break;
+			tmpnum[n] = *line;
+			n++; line++;
+		}
+		printf("\n");
+		n = atoi(tmpnum);
+		printf("n=%d %c\n",n,n);
+		tempCharVar[0] = atoi(tmpnum);
+		return tempCharVar;
+	}
+
+
+	printf("Unknown character function\n");
 	error = -1;
 	return "";
 }

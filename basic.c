@@ -6,10 +6,14 @@
  RESTORE, ON/GOTO, CLEAR, STOP, DEF FNx
 
  Formulas: a+b, a-b, a*b, a/b, a**b, -a
+ 
  Equality Tests: >, >=, <, <=, =, <>, !=
+ 
  Logical:  a&b, a|b, a^b (and/or/xor)
+ 
  Functions: SIN(), COS(), TAN(), EXP(), LN(),
- LOG(), SQR(),
+ LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
+ CHR$(), FNx
 
  Floating point numeric variables are a...z
  String variables are a$...z$
@@ -20,9 +24,9 @@
  TODO: 
  keywords: ON/GOSUB, FOPEN(), FCLOSE(), FREAD(), 
  FWRITE(), RANDOM(IZE)
- string functions: LEFT$(), MID$(), RIGHT$()
- math functions: INT(), RND(), SGN()
- misc functions: TAB()
+ string functions: VAL(), LEN()
+ math functions: INT(), RND(), SGN(), ABS(), ATN(),
+ misc functions: TAB(), NOT(), RND(), TIME()
  arrays, DIM()
 
  (C) 2022 Kurt Theis <theis.kurt@gmail.com>

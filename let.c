@@ -43,7 +43,9 @@ int run_let(char *line) {
 			}
 			line++;			// skip =
 			if (isblank(*line)) while (isblank(*line)) line++;
-			
+	
+			/* tests on right hand values */
+
 			/* see if =a$  */
 			if (*line >='a' && *line <='z' && *(line+1)=='$') {
 				strcpy(CharVars[strvar-'a'],CharVars[*line-'a']);
@@ -94,7 +96,7 @@ int run_let(char *line) {
 				printf("Syntax Error in LET\n");
 				return -1;
 			}
-			line++;		// got =  skip it
+			line++;		// got '='  skip it
 			while (1) {
 				if (*line == ',' || *line == '\0' || *line == '\n') break;
 				if (isblank(*line)) while (isblank(*line)) line++;

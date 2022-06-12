@@ -9,11 +9,12 @@ int run_print(char *line) {
 	char expr[LINESIZE];
 	int n=0;
 	float eval(char *);
-	//char linenumber[6];
 	extern char CharVars[][80];
-	//sscanf(line,"%s",linenumber);
-	//printf("PRINT: %s\n",line);
-	
+	extern char *evalstring(char *);
+	extern char tempCharVar[LINESIZE];
+	extern int error;
+	error = 0;
+
 	while (isdigit(*line++));							// skip past line number
 	if (isblank(*line)) while (isblank(*line)) line++;;	// skip spaces
 	while (isalpha(*line++));							// skip 'print'
@@ -63,6 +64,7 @@ int run_print(char *line) {
 			expr[n] = *line;
 			n++; line++;
 		}
+		/* test numeric expression */
 		printf("%g",eval(expr));
 		continue;
 
