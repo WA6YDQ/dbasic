@@ -13,7 +13,7 @@
  
  Functions: SIN(), COS(), TAN(), EXP(), LN(),
  LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
- CHR$(), FNx
+ CHR$(), FNx, INT(), ABS(), SGN(), ATN()
 
  Floating point numeric variables are a...z
  String variables are a$...z$
@@ -25,7 +25,7 @@
  keywords: ON/GOSUB, FOPEN(), FCLOSE(), FREAD(), 
  FWRITE(), RANDOM(IZE)
  string functions: VAL(), LEN()
- math functions: INT(), RND(), SGN(), ABS(), ATN(),
+ math functions: RND(),
  misc functions: TAB(), NOT(), RND(), TIME()
  arrays, DIM()
 

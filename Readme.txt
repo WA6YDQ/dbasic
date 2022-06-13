@@ -1,13 +1,12 @@
 This is the readme for dbasic - an implimentation of Dartmouth BASIC.
 
-As of Jun 9 2022 this is fully functional but
+As of Jun 11 2022 this is fully functional but
 incomplete. There are still some functions and 
 keywords I'll be adding.
 (I'm using github as my off-site backup).
 
 To build, type 'make'
 To install, type sudo make install
-
 The binary 'dbasic' will be installed in /usr/local/bin
 
 To start, type dbasic [file.bas] or dbasic (no file given)
@@ -18,8 +17,18 @@ If started with a basic file as the second arguement, the
 basic file will be loaded and executed. dbasic will terminate
 when the basic program ends.
 
-If no filename is given, a Ready prompt will be displayed. You can
-enter basic lines or commands.
+If no filename is given, a Ready prompt will be displayed
+and interactive mode is started. You can then enter basic 
+lines or commands.
+
+These are the basic commands dbasic understands:
+save [filename]	(save the buffer to a disk file)
+load [filename]	(load a disk file to the buffer)
+new 		(delete the buffer)
+list		(display the basic lines in the buffer)
+run		(start running the basic program)
+exit & quit	(exit dbasic w/o saving)
+free		(show available buffer memory)
 
 Line numbers are required, all characters (except between double
 quotes "" are lower case. (this may change later).
@@ -29,31 +38,26 @@ Entering a line number by itself will delete an existing line.
 Entering a line with an existing line number will replace the 
 original line.
 
-Variables {a...z} are floating point numeric.
-1, 21.5, -0.3, 2.4e15, 2.1e-5 are all valid
+Statements in this version of BASIC:
+ REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
+ IF/THEN, FOR/NEXT/STEP, INPUT, READ, DATA,
+ RESTORE, ON/GOTO, CLEAR, STOP, DEF FNx
 
-Variables {a$...z$} are string (max 80 chars).
+ Formulas: a+b, a-b, a*b, a/b, a**b, -a
+ 
+ Equality Tests: >, >=, <, <=, =, <>, !=
+ 
+ Logical:  a&b, a|b, a^b (and/or/xor)
+ 
+ Functions: SIN(), COS(), TAN(), EXP(), LN(),
+ LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
+ CHR$(), FNx, INT(), ABS(), SGN(), ATN()
 
-The following BASIC keywords are valid:
-REM, PRINT, LET, GOTO, ON/GOTO, GOSUB, RETURN,
-END, IF/THEN, FOR/NEXT/STEP, INPUT,
-DATA, READ, RESTORE, CLEAR, STOP, DEF FNx
+Floating point numeric variables are a...z
+String variables are a$...z$
 
-The following functions are valid:
-SIN(), COS(), TAN(), EXP(), LOG(), LN(), SQR(),
-LEFT$(), MID$(), RIGHT$(), ASC(), CHR$(), FNx
-(Note: LOG() is base 10, LN() is natural log
-like my calculator shows)
-
-
-The following math functions are valid:
-+, -, *, /, **, - (unary negative)
-
-The following equality tests are valid:
-=, !=, <>, <. <=, >, >=
-
-The following logical tests are valid:
-& (and), | (or), ^ (xor)
+NOTE: At this time there are NO arrays. 
+DIM is not yet implimented.
 
 User functions can be defined. def fn{a..z}
 An example: 
@@ -80,14 +84,7 @@ Dartmouth BASIC described in the book "BASIC 4th Edition"
 dated January 1968.
 
 
-These are the basic commands dbasic understands:
-save [filename]	(save the buffer to a disk file)
-load [filename]	(load a disk file to the buffer)
-new 		(delete the buffer)
-list		(display the basic lines in the buffer)
-run		(start running the basic program)
-exit & quit	(exit dbasic w/o saving)
-free		(show available buffer memory)
+
 
 
 --- Language exceptions ---

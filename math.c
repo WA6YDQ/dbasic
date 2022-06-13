@@ -181,6 +181,12 @@ float eval(char *expr) {
 					fvalue = tanf(tvalue);
 					goto funcend;
 				}
+				/* ATN() - arctan (atanf in c) */
+				if (strncmp(funcname,"atn",3)==0) {
+					float tvalue = eval(funcval);
+					fvalue = atanf(tvalue);
+					goto funcend;
+				}
 				/* EXP()  */
 				if (strncmp(funcname,"exp",3)==0) {
 					float tvalue = eval(funcval);
@@ -197,6 +203,26 @@ float eval(char *expr) {
 				if (strncmp(funcname,"ln",2)==0) {
 					float tvalue = eval(funcval);
 					fvalue = logf(tvalue);
+					goto funcend;
+				}
+				/* INT() return int() of expression */
+				if (strncmp(funcname,"int",3)==0) {
+					float tvalue = eval(funcval);
+					fvalue = (int)tvalue;
+					goto funcend;
+				}
+				/* ABS() return absolute value of expression */
+				if (strncmp(funcname,"abs",3)==0) {
+					float tvalue = eval(funcval);
+					fvalue = abs(tvalue);
+					goto funcend;
+				}
+				/* SGN() - return -1, 0, 1 for negative, zero, positive values */
+				if (strncmp(funcname,"sgn",3)==0) {
+					float tvalue = eval(funcval);
+					if (tvalue < 0) fvalue = (int)-1;
+					if (tvalue == 0) fvalue = 0;
+					if (tvalue > 0) fvalue = (int)1;
 					goto funcend;
 				}
 				/* ASC() return ascii number of supplied character */
