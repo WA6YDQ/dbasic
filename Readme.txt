@@ -47,11 +47,11 @@ Statements in this version of BASIC:
  
  Equality Tests: >, >=, <, <=, =, <>, !=
  
- Logical:  a&b, a|b, a^b (and/or/xor)
+ Logical:  a&b, a|b, a^b (bitwise and/or/xor)
  
  Functions: SIN(), COS(), TAN(), EXP(), LN(),
  LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
- CHR$(), FNx, INT(), ABS(), SGN(), ATN()
+ CHR$(), FNx, INT(), ABS(), SGN(), ATN(), LEN()
 
 Floating point numeric variables are a...z
 String variables are a$...z$

@@ -3,7 +3,7 @@
  Statements in this version of BASIC:
  REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
  IF/THEN, FOR/NEXT/STEP, INPUT, READ, DATA,
- RESTORE, ON/GOTO, CLEAR, STOP, DEF FNx
+ RESTORE, ON/GOTO, CLEAR, STOP, DEF
 
  Formulas: a+b, a-b, a*b, a/b, a**b, -a
  
@@ -13,7 +13,7 @@
  
  Functions: SIN(), COS(), TAN(), EXP(), LN(),
  LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
- CHR$(), FNx, INT(), ABS(), SGN(), ATN()
+ CHR$(), FNx, INT(), ABS(), SGN(), ATN(), LEN()
 
  Floating point numeric variables are a...z
  String variables are a$...z$
@@ -24,7 +24,7 @@
  TODO: 
  keywords: ON/GOSUB, FOPEN(), FCLOSE(), FREAD(), 
  FWRITE(), RANDOM(IZE)
- string functions: VAL(), LEN()
+ string functions: VAL()
  math functions: RND(),
  misc functions: TAB(), NOT(), RND(), TIME()
  arrays, DIM()

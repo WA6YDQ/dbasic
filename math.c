@@ -156,32 +156,32 @@ float eval(char *expr) {
 				expr++;		// skip ending )
 				float fvalue = 0;
 				/* now see what the function is */
-				/* SQR() */
+				/* SQR()  square root */
 				if (strncmp(funcname,"sqr",3)==0) {
 					float tvalue = eval(funcval);
 					fvalue = sqrtf(tvalue);
 					goto funcend;
 				}
 				/* NOTE: All trig functions are in radians */
-				/* SIN() */
+				/* SIN() sin x where value is in radians */
 				if (strncmp(funcname,"sin",3)==0) {
 					float tvalue = eval(funcval);
 					fvalue = sinf(tvalue);
 					goto funcend;
 				}
-				/* COS()  */
+				/* COS()  cos x where valie is in radians */
 				if (strncmp(funcname,"cos",3)==0) {
 					float tvalue = eval(funcval);
 					fvalue = cosf(tvalue);
 					goto funcend;
 				}
-				/* TAN()  */
+				/* TAN()  tan x where value is in radians */
 				if (strncmp(funcname,"tan",3)==0) {
 					float tvalue = eval(funcval);
 					fvalue = tanf(tvalue);
 					goto funcend;
 				}
-				/* ATN() - arctan (atanf in c) */
+				/* ATN() - arctan (atanf in c) where value is in radians */
 				if (strncmp(funcname,"atn",3)==0) {
 					float tvalue = eval(funcval);
 					fvalue = atanf(tvalue);
@@ -238,7 +238,17 @@ float eval(char *expr) {
 					fvalue = 0;
 					goto funcend;
 				}
-				
+				/* LEN() return length of string in string variable (a$) */
+				if (strncmp(funcname,"len",3)==0) {
+					if (funcval[0] >= 'a' && funcval[0] <= 'z' && funcval[1] == '$') {
+						fvalue = strlen(CharVars[funcval[0]-'a']);
+						goto funcend;
+					}
+					fvalue = 0;
+					goto funcend;
+				}
+
+
 				// not a recognized function
 				printf("Error - unknown numeric function %s\n",funcname);
 				error = -1;
