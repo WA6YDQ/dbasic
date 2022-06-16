@@ -61,7 +61,7 @@ Numeric variables and string variables do not share the
 same memory space.
 
 Numeric variables are pre-defined as arrays without a DIM
-statement. a is the same as a(0), and a(0).a(10) are 
+statement. a is the same as a(0), and a(0) thru a(10) are 
 initialized to 0 at program start (as are b() thru z(). 
 The dim statement can be used to make larger arrays.
  
@@ -75,11 +75,12 @@ Results in:
 f=1.32696e+07
 
 All expressions are algabraic in order:
-Powers have the highest priority: 2**8
+Unary negation (-1) is highest.
+Expressions in parens are next: (a+b)*c 
+(a+b)*c is different from a+b*c. Parens can be nested.
+Powers have the next highest priority: 2**8
 Next is multiplication and division: 3*6/4
 Then is addition and subtraction: 4+5-3+9
-Expressions in parens have priority: (a+b)*c 
-(a+b)*c is different from a+b*c. Parens can be nested.
 Lowest priority are logical functions (&, |, ^) 
 
 There are basic program examples for each keyword. See the
@@ -107,6 +108,11 @@ Here the keyword LET (as ALL keywords) must have surrounding spaces.
 15 let g=a*e-b*d
 Spaces between elements are also OK:
 30 let g = a  * e  - b  *  d
+
+Dartmouth BASIC has a...z and a0, a1, c3, d2, etc as numeric
+variables. Here we only have a...z with no second numeric
+character. Arrays are the same with a(0) thru a(10) pre-defined
+(as are b(), c(), thru z(). 
 
 In Dartmouth, the ^ character is used for powers. IE 2^3 would
 be 2*2*2. This version of BASIC uses ** instead of ^, IE 2**3
