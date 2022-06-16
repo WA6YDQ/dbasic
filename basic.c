@@ -218,8 +218,8 @@ int parse(char *line) {
 		return res;
 	}
 	if (strcmp(word,"input")==0) {		// input.c
-		run_input(line);
-		return 0;
+		res = run_input(line);
+		return res;
 	}
 	if (strcmp(word,"stop")==0) {		// stop execution
 		return -998;
@@ -430,7 +430,7 @@ runit:
 	
 	// set initial size so dim() doesn't have a fit when re-running
 	for (int n=0; n<26; n++)
-		NumSize[n] = 11;
+		NumSize[n] = 10;
 
 	// set up the base vars - these hold actual values, and assign pointers to them
 	for (int n=0; n<26; n++) {
@@ -504,8 +504,10 @@ parseLoop:
 	/* test return code */
 	if (res == -998) {				// STOP statement
 		printf("STOPPED in line %d\n",currentlinenumber);
-		printf("Ready.\n");
-		if (LOADFLAG==0) goto runloop;
+		if (LOADFLAG==0) {
+			printf("Ready.\n");
+			goto runloop;
+		}
 		free(buffer); free(DataStorage);
 		if (GARBAGE) {
 			for (int n=0; n<26; n++) {
@@ -516,8 +518,10 @@ parseLoop:
 	}
 
 	if (res == -999) {				// END Statement
-		printf("Ready.\n");
-		if (LOADFLAG==0) goto runloop;
+		if (LOADFLAG==0) {
+			printf("Ready.\n");
+			goto runloop;
+		}
 		free(buffer); free(DataStorage);
 		if (GARBAGE) {
             for (int n=0; n<26; n++) {
@@ -529,7 +533,10 @@ parseLoop:
 	
 	if (res == -1) {				// parse returned an error
 		printf("Error in line %d\n",currentlinenumber);
-		if (LOADFLAG==0) goto runloop;
+		if (LOADFLAG==0) {
+			printf("Ready.\n");
+			goto runloop;
+		}
 		free(buffer); free(DataStorage);
 		if (GARBAGE) {
             for (int n=0; n<26; n++) {

@@ -63,13 +63,19 @@ int run_print(char *line) {
 
 		// anything else is an expression
 		memset(expr,0,sizeof(expr)); n=0;
+		float res=0;
 		while (1) {
 			if (*line==',' || *line==';' || *line=='\0' || *line=='\n') break;
 			expr[n] = *line;
 			n++; line++;
 		}
 		/* test numeric expression */
-		printf("%g",eval(expr));
+		res = eval(expr);
+		if (error == -1) {
+			printf("\nError - eval error in print()\n");
+			return -1;
+		}
+		printf("%g",res);
 		continue;
 
 

@@ -14,6 +14,7 @@ int run_let(char *line) {
 	extern float *NumVar[26];
 	extern char CharVars[][80];
 	extern char *evalstring(char *);
+	extern int NumSize[26];
 
 	// debugging
 	// printf("let:line=[%s]\n",line);
@@ -104,6 +105,11 @@ int run_let(char *line) {
 				}
 				subscript = eval(SUBNUM); 
 				line++;			// point past )
+			}
+			// bounds checking
+			if (subscript < 0 || subscript > NumSize[charvar-'a']) {
+				printf("Error - bounds error in subscript: %c(%d)\n",charvar,subscript);
+				return -1;
 			}
 			char expr[LINESIZE]; memset(expr,0,LINESIZE); int n=0;
 			if (isblank(*line)) while (isblank(*line)) line++;

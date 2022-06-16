@@ -73,6 +73,7 @@ float eval(char *expr) {
 	extern float *NumVar[26];
 	extern char fn[26][80];
 	extern char CharVars[26][LINESIZE];
+	extern int NumSize[26];
 
 	int NEGFLAG=0;		// true when unary - found
 	//int MATHFLAG=0;		// true when pending math operation
@@ -310,6 +311,12 @@ float eval(char *expr) {
 			//printf("eval: subscript %d\n",subscript);
 				expr++;
 			}
+			// error bounds checking
+			if (subscript < 0 || subscript > NumSize[charvar-'a']) {
+				printf("Error - bounds error in subscript: %c(%d)\n",charvar,subscript);
+				error = -1;
+				return error;
+			}
 
 			float res = NumVar[charvar-'a'][subscript];
 			if (NEGFLAG) {
@@ -462,7 +469,7 @@ char *evalstring(char *line) {
 			tmpnum[n] = *line;
 			n++; line++;
 		}
-		int val = atoi(tmpnum);
+		int val = eval(tmpnum);
 		if (val == 0) 
 			return "";
 		// get chars from 0 thru tmpnum
@@ -503,7 +510,7 @@ char *evalstring(char *line) {
             tmpnum[n] = *line;
             n++; line++;
         }
-        int val = atoi(tmpnum);
+        int val = eval(tmpnum);
         if (val == 0)  
             return ""; 
 		// get the last (val) chars of x$
@@ -517,7 +524,7 @@ char *evalstring(char *line) {
         return tempCharVar;
     }
 
-	/* MID$(X$,S,C) */
+	/* MID$(X$,S,C)   X$: string, S:start position, C:count */
 	if (strncmp(temp,"mid$",4)==0) {
         // mid$(a$,3,2)		starting at pos 3 for 2 chars
 		int startnum,countnum;
@@ -548,7 +555,7 @@ char *evalstring(char *line) {
             tmpnum[n] = *line;
             n++; line++;
         }
-        startnum = atoi(tmpnum); startnum -= 1;	// really starts at 0
+        startnum = eval(tmpnum); startnum -= 1;	// really starts at 0
 		line++;		// skip ,
 		// get countnum
 		memset(tmpnum,0,LINESIZE); n=0;
@@ -562,11 +569,11 @@ char *evalstring(char *line) {
             tmpnum[n] = *line;
             n++; line++;
         }
-		countnum = atoi(tmpnum);
-        if (startnum == 0 || countnum == 0) return "";
+		countnum = eval(tmpnum);
+        if (startnum < 0 || countnum == 0) return "";
         // get start pos, count number of chars of x$
-		if (startnum >= strlen(CharVars[strchr-'a'])) return "";
-		if (startnum+countnum >= strlen(CharVars[strchr-'a'])) return "";
+		if (startnum > strlen(CharVars[strchr-'a'])) return "";
+		if (startnum+countnum > strlen(CharVars[strchr-'a'])) return "";
         memset(tempCharVar,0,LINESIZE); n=0;
 		for (int x=startnum; x<(startnum+countnum); x++) 
 				tempCharVar[n++] = CharVars[strchr-'a'][x];
@@ -607,8 +614,8 @@ char *evalstring(char *line) {
 			tmpnum[n] = *line;
 			n++; line++;
 		}
-		n = atoi(tmpnum);
-		tempCharVar[0] = atoi(tmpnum);
+		n = eval(tmpnum);
+		tempCharVar[0] = eval(tmpnum);
 		return tempCharVar;
 	}
 

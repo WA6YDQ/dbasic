@@ -11,6 +11,7 @@ int run_input(char *line) {
 	extern char CharVars[][LINESIZE];
 	char getline[LINESIZE];
 	float eval(char *);
+	extern int NumSize[26];
 
 	// debug 
 	// printf("INPUT: %s\n",line);
@@ -80,6 +81,12 @@ int run_input(char *line) {
 				subscript = eval(SUBNUM);
 				line++;
 			}
+			// error bounds checking
+            if (subscript < 0 || subscript > NumSize[charvar-'a']) {
+                printf("Error - bounds error in subscript: %c(%d)\n",charvar,subscript);
+                return -1;
+            }
+
 			printf("?");
 			fgets(getline,20,stdin);		// 20 chars max for digits
 			NumVar[charvar-'a'][subscript] = eval(getline);		// save value

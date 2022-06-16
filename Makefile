@@ -13,7 +13,7 @@ install:
 
 LIBS = -lm
 CC = gcc
-FLAGS = -Wall -g
+FLAGS = -Wall 
 
 basic.o	:	basic.c
 	$(CC) $(FLAGS) -c basic.c
@@ -26,14 +26,6 @@ input.o	:	input.c
 
 goto.o	:	goto.c
 	$(CC) $(FLAGS) -c goto.c
-
-#gosub.o	:	gosub.c
-#	$(CC) $(FLAGS) -c gosub.c
-
-# the functions in eval.c are depreciated
-# in favor of the functioons in math.c
-#eval.o	:	eval.c
-#	$(CC) $(FLAGS) -c eval.c 
 
 math.o	:	math.c
 	$(CC) $(FLAGS) -c math.c
