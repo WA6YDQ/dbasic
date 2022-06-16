@@ -432,9 +432,9 @@ runit:
 	for (int n=0; n<26; n++)
 		NumSize[n] = 10;
 
-	// set up the base vars - these hold actual values, and assign pointers to them
+	// set up the base vars - these hold actual values. Then assign pointers to them
 	for (int n=0; n<26; n++) {
-        NumBase[n] = (float *) malloc(11 * sizeof(float *));	// var(0)..var(10) 
+        NumBase[n] = (float *) malloc((NumSize[n]+1) * sizeof(float *));	// var(0)..var(10) 
     	if (NumBase[n] == NULL) {
 			printf("Error - memory space failed for variables: base\n");
 			exit(1);
@@ -484,6 +484,7 @@ parseLoop:
 	/* extract the current line number (used for error messages) */
 	sscanf(line,"%s",ln);
 	currentlinenumber = atoi(ln);
+	/* NOTE: line numbers are checked in insert(), but extern text files are not */
 	if (currentlinenumber <= 0) {	// error
 		printf("Error - bad line number %s\n",ln);
 // NOTE free up mallocs here 
@@ -586,7 +587,7 @@ parseLoop:
             free(NumBase[n]);
         }
     }
-	return 0;
+	exit(1);
 }
 
 

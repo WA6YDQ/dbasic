@@ -1,10 +1,5 @@
 This is the readme for dbasic - an implimentation of Dartmouth BASIC.
 
-As of Jun 16 2022 this is fully functional but
-incomplete. There are still some functions and 
-keywords I'll be adding.
-(I'm using github as my off-site backup).
-
 To build, type 'make'
 To install, type sudo make install
 The binary 'dbasic' will be installed in /usr/local/bin
@@ -50,9 +45,9 @@ Statements in this version of BASIC:
  
  Logical:  a&b, a|b, a^b (bitwise and/or/xor)
  
- Functions: SIN(), COS(), TAN(), EXP(), LN(),
- LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
- CHR$(), FNx, INT(), ABS(), SGN(), ATN(), LEN()
+ Functions: SIN(), COS(), TAN(), ATN(), EXP(), 
+LN(), LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), 
+ASC(), CHR$(), FNx, INT(), ABS(), SGN(), LEN()
 
 Floating point numeric variables are a...z
 String variables are a$...z$
@@ -63,7 +58,7 @@ same memory space.
 Numeric variables are pre-defined as arrays without a DIM
 statement. a is the same as a(0), and a(0) thru a(10) are 
 initialized to 0 at program start (as are b() thru z(). 
-The dim statement can be used to make larger arrays.
+The dim statement can be used to make arrays larger than 10.
  
 User functions can be defined. def fn{a..z}
 An example: 
@@ -91,9 +86,6 @@ Dartmouth BASIC described in the book "BASIC 4th Edition"
 dated January 1968.
 
 
-
-
-
 --- Language exceptions ---
 In the original Dartmouth BASIC you could have spaces (or
 not) scattered anywhere. This is ugly. Don't write ugly code.
@@ -112,7 +104,8 @@ Spaces between elements are also OK:
 Dartmouth BASIC has a...z and a0, a1, c3, d2, etc as numeric
 variables. Here we only have a...z with no second numeric
 character. Arrays are the same with a(0) thru a(10) pre-defined
-(as are b(), c(), thru z(). 
+(as are b(), c(), thru z(). Use dim a(n), b(n) if you need larger 
+arrays. There are no maximum array sizes.
 
 In Dartmouth, the ^ character is used for powers. IE 2^3 would
 be 2*2*2. This version of BASIC uses ** instead of ^, IE 2**3
@@ -130,3 +123,6 @@ vs calculating directly. I believe this is due to rounding errors
 in the floating point routines of the clib libraries.
 More investigation is needed.
  
+There are no fixed array sized for dim'd numeric arrays.
+dim a(1e6) is perfectly OK. Limits are based on system/virtual memory.
+
