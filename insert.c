@@ -12,8 +12,8 @@ int gethighestlinenumber() {
 	extern char *buffer;
 	extern int pos;
 	int n=0, tmppos=0, linenumber = 0;
-	char linenum[6];
-	char line[LINESIZE]; memset(line,0,LINESIZE);
+	char linenum[6] = {};
+	char line[LINESIZE] = {}; memset(line,0,LINESIZE);
 	// read a line, get line number
 ghln:
 	n = 0; 

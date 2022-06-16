@@ -16,6 +16,7 @@
  CHR$(), FNx, INT(), ABS(), SGN(), ATN(), LEN()
 
  Floating point numeric variables are a...z
+ a(0)..a(10) ... z(0)..z(10) are pre-defined
  String variables are a$...z$
 
  All keywords, variables are in lower case.
@@ -27,10 +28,16 @@
  string functions: VAL()
  math functions: RND(),
  misc functions: TAB(), NOT(), RND(), TIME()
- arrays, DIM()
 
  (C) 2022 Kurt Theis <theis.kurt@gmail.com>
  This is licensed using the MIT license.
+
+	To build this:
+	make
+	To install:
+	sudo make install
+	binary 'dbasic' will be installed in /usr/local/bin
+
 
 */
 
@@ -39,20 +46,20 @@
 #include <string.h>
 #include <ctype.h>
 #include "dbasic.h"
+#define _ISOC99_SOURCE
+#include <math.h>
 
 
 /* global variables */
 char *buffer;					// memory buffer holding the basic program
-//int NumericVars[26];			// numeric integer variables a-z
-float NumericVars[26];
 char CharVars[26][LINESIZE];	// a$ thru z$, max 80 chars long each
 int pos = 0;					// current end position of the buffer
 int currentlinenumber = 0;		// line number of the current line being tested
 int lineptr = 0;				// current buffer position during run loop
 int returnlinenumber = 0;		// position in buffer when RETURN command issued
 float index_start = 0;			// FOR/NEXT start index
-float index_end = 0;				// FOR/NEXT end index
-float index_step = 0;				// FOR/NEXT step index
+float index_end = 0;			// FOR/NEXT end index
+float index_step = 0;			// FOR/NEXT step index
 char index_var;					// FOR/NEXT count variable
 int forlinenumber = 0;			// FOR/NEXT line number to return to
 float *DataStorage;				// DATA statement storage, will assign later
@@ -61,6 +68,12 @@ int DataPosition=0;				// position of read data objects
 char fn[26][80]={};				// function definitions
 int error = 0;					// used by eval(), 0 is OK, -1 is expression error
 char tempCharVar[LINESIZE];		// used in evalstring()
+
+// these reference numeric variables
+int GARBAGE = 0;				// numeric variable garbage collection
+float *NumBase[26];				// the pointers that hold actual numeric variables a..z
+float *NumVar[26];				// the pointer used in other functions to reference a..z
+int NumSize[26];				// used in DIM(). Stops from re-diming downwards.
 
 /* extern functions */
 int parse(char *);
@@ -81,13 +94,32 @@ int def(char *);
 int insert(char *);
 void load(char *);
 void save(char *);
+int show2();
+int dim(char *);
 
 
 /***** RUN_CLEAR ******/
-/* set all vars to 0 */
+/* set all vars to 0 when program starts */
 int run_clear(void) {
-	for (int n=0; n<26; n++) 
-		NumericVars[n] = 0;
+	extern float *NumVar[26];
+	extern char fn[26][80];
+	extern float index_start, index_end, index_step;
+	extern char index_var;
+	extern int forlinenumber;
+	extern char CharVars[26][LINESIZE];
+	extern int DataPosition;
+	extern int DataStorageMax;
+
+	// clear data statements
+	DataPosition=0;
+	DataStorageMax = 0;
+
+	// clear numeric vars
+	for (int row=0; row<26; row++) {
+		for (int col=0; col<NumSize[row]; col++) {
+			NumVar[row][col] = 0;
+		}
+	}
 	// set index vars to 0
 	index_start = 0;
 	index_end = 0;
@@ -95,7 +127,7 @@ int run_clear(void) {
 	index_var = ' ';
 	forlinenumber = 0;
 	// set char vars to NULL
-	for (int n=0; n<=26; n++) memset(CharVars[n],0,LINESIZE);
+	for (int n=0; n<26; n++) memset(CharVars[n],0,LINESIZE);
 	// set functions to null
 	for (int n=0; n<26; n++) memset(fn[n],0,LINESIZE);
 	return 0;
@@ -143,12 +175,17 @@ gsrloop:
 
 int parse(char *line) {
 	int res = 0;
+	int show2();
 	char linenum[6],word[40];
 	sscanf(line,"%s %s",linenum,word);	// get line number and 1st command
-	//printf("[%s]\n",line);
-	
+
 	if (strcmp(word,"rem")==0) {		// ignore remarks
 		return 0;
+	}
+
+	if (strcmp(word,"dim")==0) {		// re-dimension numeric variable
+		res = dim(line);
+		return res;
 	}
 
 	if (strcmp(word,"data")==0) {		// ignore data statements (handled elsewhere)
@@ -242,12 +279,13 @@ int parse(char *line) {
 			printf("Error - NEXT without FOR in line %d\n",currentlinenumber);
 			exit(0);
 		}
-		NumericVars[index_var - 'a'] += index_step;
+		// index var is always subscript 0
+		NumVar[index_var - 'a'][0] += index_step;
 		if (index_step > 0) { 
-			if (NumericVars[index_var - 'a'] > index_end) 
+			if (NumVar[index_var - 'a'][0] > index_end) 
 				return 0;
 		} else {
-			if (NumericVars[index_var - 'a'] < index_end) 
+			if (NumVar[index_var - 'a'][0] < index_end) 
 					return 0;
 		}
 		return forlinenumber;
@@ -271,11 +309,17 @@ int main(int argc, char **argv) {
 	int LOADFLAG = 0;
 	int res = 0;
 
-	/* set up memory for the basic source */
+	printf("dbasic - version %s\n",VERSION);
+
+	/* set up space for numeric variables */
+	extern int NumSize[26];
+	for (int i=0; i<26; i++) NumSize[i] = 11;
+	
+	/* set up memory for the basic statements */
 	buffer = malloc(BUFSIZE*sizeof(char));
     if (buffer == NULL) {
-        printf("memory error\n");
-        return 1;
+        printf("Error - buffer memory error\n");
+        exit(1);
     }
 	memset(buffer,0,BUFSIZE);
 	LOADFLAG = 0;
@@ -302,10 +346,18 @@ int main(int argc, char **argv) {
 
 runloop:
 	fgets(line,LINESIZE,stdin);
+	
 	if (strncmp(line,"quit",4)==0 || strncmp(line,"exit",4)==0) {
-		free(DataStorage); free(buffer);
+		free(buffer);
+		if (GARBAGE) {
+			free(DataStorage);
+			for (int n=0; n<26; n++) {
+				free(NumBase[n]); NumBase[n] = NULL;
+			}
+		}
 		exit(0);
 	}
+	
 	if (strncmp(line,"list",4)==0) {	// show the buffer
 		if (pos == 0) {
 			printf("Buffer empty.\nReady.\n");
@@ -315,12 +367,14 @@ runloop:
 		printf("Ready.\n");
 		goto runloop;
 	}
+	
 	if (strncmp(line,"new",3)==0) {		// clear the buffer
 		memset(buffer,0,BUFSIZE);
 		pos = 0;
 		printf("Ready.\n");
 		goto runloop;
 	}
+	
 	if (strncmp(line,"load",4)==0) {	// load a file, run program after load
 		char cmd[5]; // space for 'load' cmd
 		sscanf(line,"%s %s",cmd,filename); filename[strlen(filename)]='\0';
@@ -328,6 +382,7 @@ runloop:
 		printf("Ready.\n");
 		goto runloop;
 	}
+	
 	if (strncmp(line,"save",4)==0) {		// save the buffer to a file
 		char cmd[5],filename[40];
 		sscanf(line,"%s %s",cmd,filename);
@@ -336,11 +391,14 @@ runloop:
 		printf("Ready.\n");
 		goto runloop;
 	}
+	
 	if (strncmp(line,"run",3)==0) goto runit;
+	
 	if (strncmp(line,"free",4)==0) {		// show available memory
 		printf("%d Bytes Free\nReady.\n",BUFSIZE-pos);
 		goto runloop;
 	}
+	
 	// not a command,
 	// replace, delete or save the entered line
 	if (line[0] == '\n') goto runloop;		// ignore empty lines
@@ -361,15 +419,46 @@ runit:
 	 
 	*/
 	
-	res = 0;		// result, function return value
-	char ln[6];			// line number string placeholder
+	if (GARBAGE) {		// did we run before? then free up variable memory
+		for (int n=0; n<26; n++) {
+			free(NumBase[n]); NumBase[n] = NULL; NumVar[n] = NULL;
+		}
+		GARBAGE = 0;
+	}
+
+	// create/re-create space for numeric variables
+	
+	// set initial size so dim() doesn't have a fit when re-running
+	for (int n=0; n<26; n++)
+		NumSize[n] = 11;
+
+	// set up the base vars - these hold actual values, and assign pointers to them
+	for (int n=0; n<26; n++) {
+        NumBase[n] = (float *) malloc(11 * sizeof(float *));	// var(0)..var(10) 
+    	if (NumBase[n] == NULL) {
+			printf("Error - memory space failed for variables: base\n");
+			exit(1);
+		}
+		NumVar[n] = NumBase[n];		// assign pointer for external functions
+	}
+
+	// let future runs know the variables exist
+	GARBAGE = 1;
+
+	res = 0;			// result, function return value
+	char ln[LNSIZE];	// line number string placeholder
 	lineptr = 0;		// initialize position in buffer
-	run_clear();		// set numeric vars to 0 at start
-						// clear string vars, for/next vars
+	run_clear();		// initialize user defined vars
+	
 	/* look for data statements, preload memory */
 	res = scanData(buffer,pos);
 	if (res == -1) {	// memory error - fatal
 		free(buffer);
+		if (GARBAGE) {
+			for (int n=0; n<26; n++) {
+				free(NumBase[n]);
+			}
+		}
 		exit(1);
 	}
 	DataPosition = 0;	// start at beginning of data list
@@ -397,13 +486,14 @@ parseLoop:
 	currentlinenumber = atoi(ln);
 	if (currentlinenumber <= 0) {	// error
 		printf("Error - bad line number %s\n",ln);
+// NOTE free up mallocs here 
 		exit(0);
 	}
-	
+
 	/* parse the BASIC statements, execute them */
 	res = parse(line);
 
-	/* test eval errors */
+	/* test for eval() errors */
 	if (error == -1) {
 		printf("Error - expression error in %d [%s]\n",currentlinenumber,line);
 		LOADFLAG=0;
@@ -417,21 +507,38 @@ parseLoop:
 		printf("Ready.\n");
 		if (LOADFLAG==0) goto runloop;
 		free(buffer); free(DataStorage);
+		if (GARBAGE) {
+			for (int n=0; n<26; n++) {
+				free(NumBase[n]);
+			}
+		}
 		exit(0);
 	}
+
 	if (res == -999) {				// END Statement
-		printf("END statement in line %d\n",currentlinenumber);
 		printf("Ready.\n");
 		if (LOADFLAG==0) goto runloop;
 		free(buffer); free(DataStorage);
+		if (GARBAGE) {
+            for (int n=0; n<26; n++) {
+                free(NumBase[n]);
+            }
+        }	
 		exit(0);
 	}
+	
 	if (res == -1) {				// parse returned an error
 		printf("Error in line %d\n",currentlinenumber);
 		if (LOADFLAG==0) goto runloop;
 		free(buffer); free(DataStorage);
+		if (GARBAGE) {
+            for (int n=0; n<26; n++) {
+                free(NumBase[n]);
+            }
+        }
 		exit(0);
 	}
+	
 	if (res > 0) {					// goto/gosub statement returns new line number
 		/* find the matching line number, set lineptr to start of line */
 		lineptr = getstartaddress(res);
@@ -439,18 +546,25 @@ parseLoop:
 			printf("Line %d - goto/gosub: bad line number %d\n",currentlinenumber,res);
 			free(buffer);
 			free(DataStorage);
+			if (GARBAGE) {
+            	for (int n=0; n<26; n++) {
+            	    free(NumBase[n]);
+            	}
+        	}
 			exit(0);
 		}
 		goto parseLoop;				// continue at new address
 	}
 
-	// get next line
+	// return code 0 is nominal return. get next line
+	
 	lineptr += (n+1);
 	if (lineptr >= pos-1) {		// end of file reached
 		printf("End of buffer reached\nReady.\n");
 		LOADFLAG=0;
 		goto runloop;
 	}
+	
 	goto parseLoop;				// continue with basic program
 
 	
@@ -460,6 +574,11 @@ parseLoop:
 	/* done */
 	free(buffer);
 	free(DataStorage);
+	if (GARBAGE) {
+        for (int n=0; n<26; n++) {
+            free(NumBase[n]);
+        }
+    }
 	return 0;
 }
 

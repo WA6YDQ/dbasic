@@ -3,7 +3,10 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#define _ISOC99_SOURCE
+#include <math.h>
 #include "dbasic.h"
+
 
 int run_print(char *line) {
 	char expr[LINESIZE];
@@ -11,7 +14,8 @@ int run_print(char *line) {
 	float eval(char *);
 	extern char CharVars[][80];
 	extern char *evalstring(char *);
-	extern char tempCharVar[LINESIZE];
+	//extern char tempCharVar[LINESIZE];
+	//extern float *NumVar[26];
 	extern int error;
 	error = 0;
 

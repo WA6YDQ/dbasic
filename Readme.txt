@@ -1,6 +1,6 @@
 This is the readme for dbasic - an implimentation of Dartmouth BASIC.
 
-As of Jun 11 2022 this is fully functional but
+As of Jun 16 2022 this is fully functional but
 incomplete. There are still some functions and 
 keywords I'll be adding.
 (I'm using github as my off-site backup).
@@ -25,10 +25,11 @@ These are the basic commands dbasic understands:
 save [filename]	(save the buffer to a disk file)
 load [filename]	(load a disk file to the buffer)
 new 		(delete the buffer)
+free		(show available buffer memory)
 list		(display the basic lines in the buffer)
 run		(start running the basic program)
 exit & quit	(exit dbasic w/o saving)
-free		(show available buffer memory)
+
 
 Line numbers are required, all characters (except between double
 quotes "" are lower case. (this may change later).
@@ -56,9 +57,14 @@ Statements in this version of BASIC:
 Floating point numeric variables are a...z
 String variables are a$...z$
 
-NOTE: At this time there are NO arrays. 
-DIM is not yet implimented.
+Numeric variables and string variables do not share the
+same memory space.
 
+Numeric variables are pre-defined as arrays without a DIM
+statement. a is the same as a(0), and a(0).a(10) are 
+initialized to 0 at program start (as are b() thru z(). 
+The dim statement can be used to make larger arrays.
+ 
 User functions can be defined. def fn{a..z}
 An example: 
 10 def fnf 1/(6.28*sqr(l*c))

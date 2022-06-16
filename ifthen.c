@@ -17,8 +17,9 @@ int run_ifthen(char *line) {
 	float lvalue=0, rvalue=0, linenum=0;
 	int n=0;
 	char expr[LINESIZE] = {};					// expression for eval()
-	
-	//printf("line is [%s]\n",line);
+
+	// debug
+	// printf("line is [%s]\n",line);
 	
 	while (isdigit(*line)) line++;		// skip line number
 	if (isblank(*line)) while (isblank(*line)) line++;		// and spaces
@@ -37,7 +38,6 @@ int run_ifthen(char *line) {
 		}
 	}
 	lvalue = eval(expr);
-	//printf("ifthen: lvalue=%d\n",lvalue);
 
 	/* get test variable */
 	int testchar = 0;
@@ -75,7 +75,6 @@ int run_ifthen(char *line) {
 		printf("Unknown test character %c\n",*line);
 		return -1;
 	}
-	//printf("ifthen: test variable = %d\n",testchar);
 
 
 	/* get 2nd value for tests */
@@ -91,7 +90,6 @@ int run_ifthen(char *line) {
 		}
 	}
 	rvalue = eval(expr);
-	//printf("ifthen: rvalue = %d\n",rvalue);
 
 	/* get THEN statement */
 	if (isblank(*line)) while (isblank(*line)) line++;
@@ -117,7 +115,6 @@ int run_ifthen(char *line) {
 		}
 	}
 	linenum = eval(expr);
-	//printf("ifthen: line number = %d\n",linenum);
 
 	/* run test betweek values */
 	if (testchar == 1) 			// less than

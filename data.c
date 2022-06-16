@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#include "dbasic.h"
 
 /* scan the buffer for data statements
  * first scan, get a count of records,
@@ -17,15 +17,16 @@
 extern float *DataStorage;
 extern int DataStorageMax;
 extern int DataPosition;
+extern int GARBAGE;
 
 int scanData(char *buffer, int lastpos) {
 
 	int position=0;		// current position in the buffer;
 	int n=0;
-	char ln[6],keyword[12],line[80];
-	int x;
+	char ln[6]={} ,keyword[12]={},line[80]={};
+	int x=0;;
 	char *testline;
-	char numstr[12];
+	char numstr[12]={};
 
 bufscan:
 	/* scan the buffer */
@@ -43,7 +44,6 @@ bufscan:
 	position += (n+1);
 
 	/* test the line for a data statement */
-	//printf("bufscan: line [%s]\n",line);
 	sscanf(line,"%s %s",ln,keyword);
 	if (strcmp(keyword,"data")!=0) goto bufscan;
 
@@ -55,13 +55,13 @@ bufscan:
 	goto bufscan;			// done with line
 
 step2:
-	//printf("bufscan: first scan complete\n");
-	//printf("bufscan: number of data elements: %d\n",DataStorageMax);
 	
 	/* define storage space for the data elements */
+	if (GARBAGE)
+		free(DataStorage);
 	DataStorage = malloc((DataStorageMax+1)*sizeof(float));
 	if (DataStorage == NULL) {
-		printf("Memory Error allocating data elements\n");
+		printf("Error - memory allocation error in data elements\n");
 		return -1;
 	}
 
@@ -84,7 +84,6 @@ bufload:
 	position += (n+1);
 
 	/* test the line for a data statement */
-    //printf("bufscan: line [%s]\n",line);
     sscanf(line,"%s %s",ln,keyword);
     if (strcmp(keyword,"data")!=0) goto bufload;
 
@@ -109,7 +108,6 @@ bufload2:
 	
 	/* value in intval */
 	numstr[n+1] = '\0';
-	//printf("data element: %s\n",numstr);
 	DataStorage[DataPosition] = atof(numstr);
 	DataPosition++;
 	testline += 1;		// skip the comma
@@ -121,23 +119,17 @@ bufload2:
 step3:
 	/* finished loading */
 	DataStorageMax = DataPosition-1;		// max number of data elements
-	/*
-	printf("scanData: finished loading\n");
-	printf("scanData: DataPosition %d\n",DataPosition);
-	printf("Verification: \n");
-	for (n=0; n<DataPosition; n++) printf("DataStorage[%d] = %d\n",n,DataStorage[n]);
-	*/
 	
 	return 0;
 }
 
 	
 int run_read(char *line) {		// load variables with data values
-	//extern int NumericVars[];
-	extern float NumericVars[];
+	extern float *NumVar[26];
 	extern float *DataStorage;
 	extern int DataStorageMax;
 	extern int DataPosition;
+	float eval(char *);
 
 	if (isdigit(*line)) while (isdigit(*line)) line++;  // skip line #
     if (isblank(*line)) while (isblank(*line)) line++;  // and spaces
@@ -156,7 +148,23 @@ int run_read(char *line) {		// load variables with data values
 				printf("Out Of Data\n");
 				return -1;
 			}
-			NumericVars[*line-'a'] = DataStorage[DataPosition];
+			// get subscript (if used)
+			int subscript = 0;
+			char charvar = *line;
+			line++;
+			if (*line == '(') {		// using subscripts
+				line++;
+				char SUBNUM[LINESIZE]={};
+				int n=0;
+				while (1) {
+					if (*line == ')') break;
+					SUBNUM[n] = *line;
+					line++; n++;
+				}
+				subscript = eval(SUBNUM);
+				line++;
+			}
+			NumVar[charvar-'a'][subscript] = DataStorage[DataPosition];
 			DataPosition++;
 			line++;
 			continue;

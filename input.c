@@ -7,12 +7,13 @@
 #include "dbasic.h"
 
 int run_input(char *line) {
-	extern float NumericVars[];
+	extern float *NumVar[26];
 	extern char CharVars[][LINESIZE];
 	char getline[LINESIZE];
 	float eval(char *);
 
-	//printf("INPUT: %s\n",line);
+	// debug 
+	// printf("INPUT: %s\n",line);
 
 	while (isdigit(*line)) line++;		// skip line number
 	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
@@ -63,10 +64,25 @@ int run_input(char *line) {
 
 
 		/* if a-z get numeric input */
-		if (*line >= 'a' && *line <= 'z') {
+		if (*line >= 'a' && *line <= 'z' && *(line+1) != '$') {
+			int subscript = 0;
+			char charvar = *line;
+			line++;
+			if (*line == '(') {	// using subscripts
+				line++;
+				char SUBNUM[LINESIZE]={};
+				int n=0;
+				while (1) {
+					if (*line == ')') break;
+					SUBNUM[n] = *line;
+					line++; n++;
+				}
+				subscript = eval(SUBNUM);
+				line++;
+			}
 			printf("?");
 			fgets(getline,20,stdin);		// 20 chars max for digits
-			NumericVars[*line-'a'] = eval(getline);		// was atof(getline);
+			NumVar[charvar-'a'][subscript] = eval(getline);		// save value
 			line++;
 			continue;
 		}

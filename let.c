@@ -4,17 +4,19 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#define _ISOC99_SOURCE
+#include <math.h>
 #include "dbasic.h"
 
 int run_let(char *line) {
 
 	float eval(char *);
-	extern float NumericVars[];
+	extern float *NumVar[26];
 	extern char CharVars[][80];
 	extern char *evalstring(char *);
-	//extern char tempCharVar[LINESIZE];
 
-	//printf("let:line=[%s]\n",line);
+	// debugging
+	// printf("let:line=[%s]\n",line);
 
 	while (isdigit(*line)) line++;  	// skip line number
 	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
@@ -87,10 +89,23 @@ int run_let(char *line) {
 		}
 
 		/* test numeric variable */
-		if (*line >= 'a' && *line <= 'z') {
-			char usevar = *line;
+		if (*line >= 'a' && *line <= 'z' && *(line+1) != '$') {
+			int subscript = 0;
+			char charvar = *line;		// get variable name
+			line++;
+			if (*line == '(') {		// subscripts
+				line++;			// point past (
+				char SUBNUM[LINESIZE]={};	// string for subscript
+				int n=0;
+				while (1) {			// get subscript
+					if (*line == ')') break;
+					SUBNUM[n] = *line;
+					line++; n++;
+				}
+				subscript = eval(SUBNUM); 
+				line++;			// point past )
+			}
 			char expr[LINESIZE]; memset(expr,0,LINESIZE); int n=0;
-			line++;		// skip variable
 			if (isblank(*line)) while (isblank(*line)) line++;
 			if (*line != '=') {
 				printf("Syntax Error in LET\n");
@@ -107,9 +122,10 @@ int run_let(char *line) {
 					return -1;
 				}
 			}
-			NumericVars[usevar - 'a'] = eval(expr);
+			float res = eval(expr);
+			NumVar[charvar-'a'][subscript] = res;
 			continue;
-		}
+		} 
 
 		
 		/* unknown char */

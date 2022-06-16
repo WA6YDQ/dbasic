@@ -10,19 +10,21 @@ int run_for(char *line) {
 	extern float index_start;
 	extern float index_end;
 	extern float index_step;
-	extern float NumericVars[];
+	extern float *NumVar[26];
 	char expr[40] = {};
 	int n=0;
 	float eval(char *);
 
-	//printf("run_for: line [%s]\n",line);
+	// debug
+	// printf("run_for: line [%s]\n",line);
+
 	while (isdigit(*line)) line++;			// skip the line number
 	while (isblank(*line)) line++;			// skip spaces
 	while (isalpha(*line)) line++;			// skip FOR command
 	if (isblank(*line)) while (isblank(*line)) line++;	// skip more spaces
 
-	/* get index variable */
-	if (*line >= 'a' && *line <= 'z') 
+	/* get index variable NOTE: will always be subscript 0 x(0)*/
+	if (*line >= 'a' && *line <= 'z' && *(line+1) != '$' && *(line+1) != '(') 
 		index_var = *line;
 	else {
 		printf("Error - undefined index variable %c\n",*line);
@@ -53,11 +55,9 @@ int run_for(char *line) {
 		}
 	}
 	index_start = eval(expr);
-	//printf("run_for: index_start = %d\n",index_start);
 
 	/* set up index variable */
-	NumericVars[index_var - 'a'] = index_start;
-	//printf("run_for: %c set to %d\n",index_var,NumericVars[index_var - 'a']);
+	NumVar[index_var - 'a'][0] = index_start;
 
 	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 
@@ -83,7 +83,6 @@ int run_for(char *line) {
 		}
 	}
 	index_end = eval(expr);
-	//printf("run_for: index_end = %d\n",index_end);
 
 	/* look for 'S' in STEP or \n for EOL */
 	while (1) {
@@ -99,7 +98,6 @@ int run_for(char *line) {
 	if (*line == '\n' || *line == '\0') return 0;	// normal return, STEP not used
 	if (*line=='s' && *(line+1)=='t' && *(line+2)=='e' && *(line+3)=='p') {
 		line += 4;		// skip STEP keyword
-		//printf("run_for: found step\n");
 	} else {
 		printf("Error - unknown chars in FOR/NEXT statement\n");
 		return -1;
@@ -118,7 +116,6 @@ int run_for(char *line) {
 		n++; line++;
 	}
 	index_step = eval(expr);
-	//printf("run_for: index_step = %d\n",index_step);
 
 	/* test line end char */
 	if (*line == '\n' || *line == '\0') return 0;

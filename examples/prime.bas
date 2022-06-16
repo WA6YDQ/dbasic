@@ -1,5 +1,5 @@
 10 rem prime.bas
-11 run the sieve of eratosthenes prime number program
+11 rem run the sieve of erastosthenes program
 12 rem this returns 1899 primes in about 1 second
 13 on a raspberry pi 4 running dbasic
 20 let s=8190
@@ -20,3 +20,4 @@
 170 let c=c+1
 180 next i
 190 print c,"primes"
+200 end

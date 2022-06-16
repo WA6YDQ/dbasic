@@ -70,7 +70,7 @@ float domath(float lval, float rval, char ch) {
 /* return float value of supplied expression */
 float eval(char *expr) {
 
-	extern float NumericVars[];
+	extern float *NumVar[26];
 	extern char fn[26][80];
 	extern char CharVars[26][LINESIZE];
 
@@ -293,15 +293,31 @@ float eval(char *expr) {
 
 
 
-		/* convert single char variables into numbers */
+		/* convert numeric variables into numbers */
 		if (*expr >= 'a' && *expr <= 'z' && *(expr+1)!='$') {
-			float res = NumericVars[*expr - 'a'];
+			/* get subscript */
+			int subscript = 0; char charvar = *expr;
+			expr++;
+			if (*expr == '(') {		// using subscript
+				expr++;				// point past (
+				char SUBNUM[8]={}; int n=0;
+				while (1) {
+					if (*expr == ')') break;
+					SUBNUM[n] = *expr;
+					expr++; n++;
+				}
+				subscript = eval(SUBNUM);
+			//printf("eval: subscript %d\n",subscript);
+				expr++;
+			}
+
+			float res = NumVar[charvar-'a'][subscript];
 			if (NEGFLAG) {
 				res = res * -1;
 				NEGFLAG=0;
 			}
 			val[valpos] = res;
-			expr++; valpos++;
+			valpos++;
 			continue;
 		}
 
@@ -359,12 +375,6 @@ float eval(char *expr) {
 
 	/* EOL reached - parse the resultant sequence of numbers & expressions */
 	
-	/*
-	printf("\nparsing: ");
-	for (int x=1; x<valpos; x++)
-		printf("%g%c",val[x],mathchr[x]);
-	printf("\n");
-	*/
 
 	int i=0, FLAG=0; float res=0; int n=0;
 
@@ -413,9 +423,9 @@ char *evalstring(char *line) {
 
 	extern char tempCharVar[LINESIZE];
 	extern char CharVars[26][LINESIZE];
+	extern float *NumVar[26];
 	extern int error;
 	error = 0;
-	extern float NumericVars[26];
 	char temp[LINESIZE]={};
 	int n=0;
 	while (1) {
@@ -568,8 +578,23 @@ char *evalstring(char *line) {
 		line++;		// skip (
 		// test if variable a-z
 		if (*line >= 'a' && *line <= 'z' && *(line+1) == ')') {		// numeric var
+			int subscript = 0;
+			char charvar = *line;
+			line++;
+			if (*line == '(') {	// get subscript
+				line++;		// skip (
+				char SUBNUM[LINESIZE]={};
+				int n=0;
+				while (1) {		// get subscript
+					if (*line == ')') break;
+					SUBNUM[n] = *line;
+					line++; n++;
+				}
+				subscript = eval(SUBNUM);
+				line++;
+			}
 			memset(tempCharVar,0,LINESIZE);
-			tempCharVar[0] = (char)NumericVars[*line-'a'];
+			tempCharVar[0] = (char)NumVar[charvar-'a'][subscript];
 			return tempCharVar;
 		}
 		// test if number
@@ -578,14 +603,11 @@ char *evalstring(char *line) {
 		memset(tempCharVar,0,LINESIZE);
 		n=0; 
 		while (1) {
-			printf("chr %c ",*line);
 			if (!isdigit(*line)) break;
 			tmpnum[n] = *line;
 			n++; line++;
 		}
-		printf("\n");
 		n = atoi(tmpnum);
-		printf("n=%d %c\n",n,n);
 		tempCharVar[0] = atoi(tmpnum);
 		return tempCharVar;
 	}
