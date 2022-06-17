@@ -1,66 +1,81 @@
 This is the readme for dbasic - an implimentation of Dartmouth BASIC.
+This is licensed under the MIT license. This compiles cleanly
+and makes valgrind happy.
 
 To build, type 'make'
 To install, type sudo make install
 The binary 'dbasic' will be installed in /usr/local/bin
-
-To start, type dbasic [file.bas] or dbasic (no file given)
-
-Usage:
-
-If started with a basic file as the second arguement, the
-basic file will be loaded and executed. dbasic will terminate
-when the basic program ends.
-
-If no filename is given, a Ready prompt will be displayed
-and interactive mode is started. You can then enter basic 
-lines or commands.
-
-These are the basic commands dbasic understands:
-save [filename]	(save the buffer to a disk file)
-load [filename]	(load a disk file to the buffer)
-new 		(delete the buffer)
-free		(show available buffer memory)
-list		(display the basic lines in the buffer)
-run		(start running the basic program)
-exit & quit	(exit dbasic w/o saving)
-
-
-Line numbers are required, all characters (except between double
-quotes "" are lower case. (this may change later).
-
-Entering a line will save the line in the buffer.
-Entering a line number by itself will delete an existing line. 
-Entering a line with an existing line number will replace the 
-original line.
 
 Statements in this version of BASIC:
  REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
  IF/THEN, FOR/NEXT/STEP, INPUT, READ, DATA,
  RESTORE, ON/GOTO, CLEAR, STOP, DEF FNx
 
- Formulas: a+b, a-b, a*b, a/b, a**b, -a
+Expressions: a+b, a-b, a*b, a/b, a**b, -a
  
- Equality Tests: >, >=, <, <=, =, <>, !=
+Equality Tests: >, >=, <, <=, =, <>, !=
  
- Logical:  a&b, a|b, a^b (bitwise and/or/xor)
+Logical:  a&b, a|b, a^b (bitwise and/or/xor)
  
- Functions: SIN(), COS(), TAN(), ATN(), EXP(), 
-LN(), LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), 
-ASC(), CHR$(), FNx, INT(), ABS(), SGN(), LEN()
+Functions: 
+  SIN(), COS(), TAN(), ATN(), EXP(), 
+  LN(), LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), 
+  ASC(), CHR$(), FNx, INT(), ABS(), SGN(), LEN()
 
-Floating point numeric variables are a...z
-String variables are a$...z$
+
+To start, type dbasic [file.bas] or dbasic (no file given)
+
+If started with a BASIC file as the second arguement, the
+BASIC file will be loaded and executed. dbasic will terminate
+when the basic program ends.
+
+If no filename is given, a Ready prompt will be displayed
+and interactive mode is started. You can then enter BASIC 
+lines or commands.
+
+These are the interactive user commands dbasic understands:
+
+save [filename]	(save the BASIC program to disk)
+load [filename]	(load a BASIC program from disk)
+new 		(delete the buffer)
+free		(show available buffer memory)
+list		(display the basic lines in the buffer)
+run		(start running the basic program)
+exit		(exit dbasic w/o saving)
+quit		(exit dbasic w/o saving)
+
+
+Line numbers are required. All lines entered or loaded
+from a file are converted to lower case (except between
+double quotes "" are left alone). All user commands 
+are lower case. Filenames for save and load can be upper
+or lower case.
+
+Entering a line will save the line in the buffer.
+Entering a line number by itself will delete an existing line. 
+Entering a line with an existing line number will replace the 
+original line.
+
+
+Numeric variables are single letter, a...z
+All numeric variables are floating point. Use
+the INT() function to change the type.
+
+String variables are single letter, a$...z$
 
 Numeric variables and string variables do not share the
 same memory space.
 
-Numeric variables are pre-defined as arrays without a DIM
-statement. a is the same as a(0), and a(0) thru a(10) are 
-initialized to 0 at program start (as are b() thru z(). 
-The dim statement can be used to make arrays larger than 10.
+Numeric variables a(0) thru a(10) are pre-defined as 
+arrays without a DIM statement (as are b(0)...b(10), c(0)...c(10),
+etc thru z(0)...z(10).
+To make the arrays larger use the DIM statement. Array size
+is limited only by available memory: a(1e6) is a valid statement.
+Also, arrays can be dimmed more than once in a program. Existing
+array values remain unchanged.
+
  
-User functions can be defined. def fn{a..z}
+Twenty six user functions can be defined: def fn{a..z}
 An example: 
 10 def fnf 1/(6.28*sqr(l*c))
 20 let l=1.2e-6, c=120e-12
@@ -78,12 +93,21 @@ Next is multiplication and division: 3*6/4
 Then is addition and subtraction: 4+5-3+9
 Lowest priority are logical functions (&, |, ^) 
 
+Parenthesises can be nested:
+10 let a=(1+2)*(2+(3*4+(43821+5)))
+20 print a
+99 end
+run
+131520
+
+
 There are basic program examples for each keyword. See the
 file *.bas in the examples directory of this repository.
 
 This basic interpreter follows (mostly, exceptions below)
 Dartmouth BASIC described in the book "BASIC 4th Edition"
-dated January 1968.
+dated January 1968. There are many additional functions
+and keywords not in the original specification in this version.
 
 
 --- Language exceptions ---
@@ -118,11 +142,9 @@ as != for a not equal comparison.
 
 --- Usage Notes ---
 
-You may get slightly differing results when calculating defined functions
-vs calculating directly. I believe this is due to rounding errors
-in the floating point routines of the clib libraries.
-More investigation is needed.
- 
-There are no fixed array sized for dim'd numeric arrays.
-dim a(1e6) is perfectly OK. Limits are based on system/virtual memory.
+You may get slightly differing results when calculating using 
+defined functions vs calculating directly. This is due to rounding 
+errors in the floating point routines of the clib libraries.
+
+
 

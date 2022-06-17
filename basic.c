@@ -299,7 +299,8 @@ int parse(char *line) {
 
 
 /*************************/
-/********* MAIN **********/
+/*******   MAIN   ********/
+/*************************/
 
 int main(int argc, char **argv) {
 
@@ -311,10 +312,6 @@ int main(int argc, char **argv) {
 
 	printf("dbasic - version %s\n",VERSION);
 
-	/* set up space for numeric variables */
-	extern int NumSize[26];
-	for (int i=0; i<26; i++) NumSize[i] = 11;
-	
 	/* set up memory for the basic statements */
 	buffer = malloc(BUFSIZE*sizeof(char));
     if (buffer == NULL) {
@@ -487,7 +484,8 @@ parseLoop:
 	/* NOTE: line numbers are checked in insert(), but extern text files are not */
 	if (currentlinenumber <= 0) {	// error
 		printf("Error - bad line number %s\n",ln);
-// NOTE free up mallocs here 
+		free(buffer); free(DataStorage);
+		for (int n=0; n<26;n++) free(NumBase[n]);
 		exit(0);
 	}
 
@@ -551,7 +549,9 @@ parseLoop:
 		/* find the matching line number, set lineptr to start of line */
 		lineptr = getstartaddress(res);
 		if (lineptr == -1) {			// bad line number
-			printf("Line %d - goto/gosub: bad line number %d\n",currentlinenumber,res);
+			printf("Error - goto/gosub: line %d, bad line number [%d]\n",currentlinenumber,res);
+			printf("Ready.\n");
+			if (LOADFLAG == 0) goto runloop;
 			free(buffer);
 			free(DataStorage);
 			if (GARBAGE) {

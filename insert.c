@@ -77,12 +77,26 @@ int insert(char line[LINESIZE]) {
 	extern int getstartaddress(int);
 	extern int pos;
 	extern char *buffer;
-	int i, n;
-	int linestart, lineend, linesize;
+	char ch;
+	int i=0, n=0, QFLAG=0;
+	int linestart=0, lineend=0, linesize=0;
 
 	if (strlen(line) > (BUFSIZE-pos)) {
 		printf("Error - no space left\n");
 		return -1;
+	}
+
+	// convert all except between "" to lower case
+	QFLAG=0; n=0;
+	while (1) {
+		ch = line[n];
+		if (ch == '\n' || ch == '\0') break;
+		if (ch == '"')
+			QFLAG = abs(QFLAG-1);
+		if (!QFLAG)
+			line[n] = tolower(ch);
+		n++;
+		continue;
 	}
 
 	// test if line has a line number
