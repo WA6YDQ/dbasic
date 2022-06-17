@@ -104,6 +104,9 @@ run
 There are basic program examples for each keyword. See the
 file *.bas in the examples directory of this repository.
 
+While running, hitting ctrl-C will stop execution. If the
+user is in an input loop, hit ctrl-C then press the enter key.
+
 This basic interpreter follows (mostly, exceptions below)
 Dartmouth BASIC described in the book "BASIC 4th Edition"
 dated January 1968. There are many additional functions
@@ -146,5 +149,20 @@ You may get slightly differing results when calculating using
 defined functions vs calculating directly. This is due to rounding 
 errors in the floating point routines of the clib libraries.
 
+Using IF/THEN:
+Legal: 
+10 if a<10 then 20
+10 if a < 10 then 20
+10 if a>=10 then 20
+
+Not Legal:
+10 if a !   = 10 then 20
+10 if a!  =10 then 20
+10 if a<>10 then20
+10 ifa>10then 20
+
+Keep the test characters together if more than 1:
+<=, >=, !=, <>
+The keywords if/then must have a surrounding space.
 
 

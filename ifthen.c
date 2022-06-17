@@ -10,6 +10,11 @@
 #include <ctype.h>
 #include "dbasic.h"
 
+/* return 1 on valid operand */
+int isoperand(char ch) {
+	if (ch == '<' || ch == '>' || ch == '!' || ch == '=') return 1;
+	return 0;
+}
 
 int run_ifthen(char *line) {
 
@@ -17,6 +22,7 @@ int run_ifthen(char *line) {
 	float lvalue=0, rvalue=0, linenum=0;
 	int n=0;
 	char expr[LINESIZE] = {};					// expression for eval()
+	int isoperand(char);
 
 	// debug
 	// printf("line is [%s]\n",line);
@@ -30,38 +36,41 @@ int run_ifthen(char *line) {
 	memset(expr,0,sizeof(expr)); n = 0;
 	while (1) {
 		if (isblank(*line)) break;
+		if (isoperand(*line)) break;
+		if (*line == '\0' || *line == '\n') {
+			printf("Error - missing expression in IF statement\n");
+			return -1;
+		}
 		expr[n] = *line;
 		n++; line++;
 		if (n >= LINESIZE) {					// expression too long
-			printf("Error - expression too long\n");
+			printf("Error - expression too long in IF\n");
 			return -1;
 		}
 	}
+
 	lvalue = eval(expr);
 
 	/* get test variable */
 	int testchar = 0;
 	// skip any spaces
 	if (isblank(*line)) while (isblank(*line)) line++;
-	if (*line == '<' && *(line+1)==' ') {
-		testchar = 1;	// less than
-		line += 1;
-	}
-	else if (*line == '<' && *(line+1)=='=') {
+	
+	if (isoperand(*line) && !isoperand(*(line+1))) {
+		if (*line == '<') 
+			testchar = 1;
+		else if (*line == '>')
+			testchar = 3;
+		else if (*line == '=')
+			testchar = 5;
+		line++;
+	} else if (*line == '<' && *(line+1)=='=') {
 		testchar = 2;	// less than or equal
 		line += 2;
-	}
-	else if (*line == '>' && *(line+1)==' ') {
-		testchar = 3;	// greater than
-		line += 1;
 	}
 	else if (*line == '>' && *(line+1)=='=') {
 		testchar = 4;	// greater than or equal
 		line += 2;
-	}
-	else if (*line == '=' && *(line+1)==' ') {
-		testchar = 5;	// equal
-		line += 1;
 	}
 	else if (*line == '!' && *(line+1)=='=') {
 		testchar = 6;	// not equal

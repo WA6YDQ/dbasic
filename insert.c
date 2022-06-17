@@ -113,6 +113,16 @@ int insert(char line[LINESIZE]) {
 	// line number not in buffer- see where to place it
 	if (startaddress == -1) {	
 		
+		// first test for an empty line (not allowed)
+		n=-1;
+		while (1) {
+			n++;
+			if (isdigit(line[n])) continue;
+			if (line[n] == '\0' || line[n] == '\n') return 0;
+			if (isblank(line[n])) continue;
+			break;
+		}
+
 		// test for end-of-buffer insert
 		if (gethighestlinenumber() < atoi(linenum)) {
 			for (i=0; i<strlen(line); i++) {
@@ -121,8 +131,10 @@ int insert(char line[LINESIZE]) {
 			pos += i;	// and increment the end of the buffer
 			return 0;
 		}
+		
 		// insert somewhere in the buffer
 		startaddress = getaddressbeforelinenumber(atoi(linenum));
+		
 		// insert the line at this address
 		linesize = strlen(line);
         n = 0;
@@ -132,7 +144,8 @@ int insert(char line[LINESIZE]) {
             if (pos-n == startaddress-1) break;
         }
         pos += linesize;        // update end of buffer
-        // insert new line at startaddress
+        
+		// insert new line at startaddress
         for (n=0; n<linesize; n++)
             buffer[startaddress+n] = line[n];
 
@@ -151,7 +164,7 @@ int insert(char line[LINESIZE]) {
 	// get size of existing line
 	linesize = i-linestart+1;
 
-	// shift down everything, deleteing old line
+	// shift down everything, deleting old line
 	for (n=0; n<pos; n++)
 		buffer[linestart+n] = buffer[lineend+n];
 	pos = pos-linesize+1;
@@ -168,6 +181,7 @@ int insert(char line[LINESIZE]) {
 			if (pos-n == linestart-1) break;
 		}
 		pos += linesize;		// update end of buffer
+		
 		// insert new line at startaddress
 		for (n=0; n<linesize; n++)
 			buffer[startaddress+n] = line[n];
