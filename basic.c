@@ -45,6 +45,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <signal.h>
+#include <unistd.h>
 #include "dbasic.h"
 #define _ISOC99_SOURCE
 #include <math.h>
@@ -68,6 +70,8 @@ int DataPosition=0;				// position of read data objects
 char fn[26][80]={};				// function definitions
 int error = 0;					// used by eval(), 0 is OK, -1 is expression error
 char tempCharVar[LINESIZE];		// used in evalstring()
+int RUNSTOP=0;					// ctrl-C handler
+
 
 // these reference numeric variables
 int GARBAGE = 0;				// numeric variable garbage collection
@@ -297,6 +301,13 @@ int parse(char *line) {
 	return 0;
 }
 
+void ignoreC(int dummy) {
+	usleep(10000);
+	if (!RUNSTOP) return;
+	RUNSTOP = 0;
+	return;
+}
+
 
 /*************************/
 /*******   MAIN   ********/
@@ -309,6 +320,9 @@ int main(int argc, char **argv) {
 	char filename[LINESIZE]={};
 	int LOADFLAG = 0;
 	int res = 0;
+	RUNSTOP = 0;
+
+	signal(SIGINT, ignoreC);		// ignore ctrl-C
 
 	printf("dbasic - version %s\n",VERSION);
 
@@ -342,6 +356,7 @@ int main(int argc, char **argv) {
 	/******************************************************************/
 
 runloop:
+	RUNSTOP = 0;
 	fgets(line,LINESIZE,stdin);
 	
 	if (strncmp(line,"quit",4)==0 || strncmp(line,"exit",4)==0) {
@@ -441,6 +456,8 @@ runit:
 
 	// let future runs know the variables exist
 	GARBAGE = 1;
+	// handle user breaks
+	RUNSTOP = 1;
 
 	res = 0;			// result, function return value
 	char ln[LNSIZE];	// line number string placeholder
@@ -573,8 +590,12 @@ parseLoop:
 		goto runloop;
 	}
 	
-	goto parseLoop;				// continue with basic program
-
+	if (RUNSTOP) 
+		goto parseLoop;				// continue with basic program
+	
+	// user hit ctrl-c
+	printf("\nBreak in %d\nReady.\n",currentlinenumber);
+	goto runloop;
 	
 	/* all below should never be reached */
 	printf("Unknown error in line %d.\n",currentlinenumber);
