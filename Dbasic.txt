@@ -91,7 +91,7 @@ or lower case or mixed case.
 
 When entering a line, the statements will be saved in numerical order. 
 This means you can enter the above BASIC program starting at statement 99 
-and working backwords to line 10.
+and working backwards to line 10.
 
 If you enter a line number of an existing line by itself, the existing
 line will be deleted from the buffer. If you enter a different line with
@@ -167,12 +167,27 @@ Parenthesises can be nested:
 run
 131520
 
+Functions can be nested:
+10 let d=deg(sin(pi(0)+0.05))
+20 print d
+99 end
+run
+-2.8636
+Ready.
+
+
+
 While running, hitting ctrl-C will stop execution. If the
 user is in an input loop, hit ctrl-C then press the enter key.
 
 -------------------------------------
 ---------- dbasic KEYWORDS ----------
 -------------------------------------
+
+All keywords need a surrounding space:
+10 let a=5, b=10
+20 if a=5 then 10
+
 
 The following BASIC statements are recognized as
 valid keywords by dbasic:
@@ -201,6 +216,22 @@ Semi-colons stop spacing and linefeeds when used at line end
 Commas print 3 spaces, everything between double quotes " " 
 is printed as is.
 
+NOTE: The PRINT statement will NOT evaluate string
+expressions:
+10 print left$(a$,1) 
+will fail.
+
+Instead use:
+10 let p$=left$(a$,1)
+20 print p$
+
+This is true for left$(), mid$(), right$(), chr$()
+
+The SPC() function will print the number of spaces 
+between (). 
+10 print spc(5);"This is printed with leading spaces"
+
+See the SPC() function below for more examples.
 
 
 --- INPUT ---
@@ -215,6 +246,9 @@ Get user input:
 10 rem get string from the user
 20 input "Enter a string: ",a$
 30 print "You entered ";a$
+
+Both commas ',' and semi-colons ';' act just as in
+the PRINT statement above.
 
 
 
@@ -250,7 +284,7 @@ will NOT work. Instead use:
 40 next n
 
 NOTE: for/next loops CANNOT be nested. This may change
-in future releases.
+in future releases of dbasic.
 
 
 --- IF/THEN ---
@@ -274,6 +308,10 @@ in future releases.
 10 rem with expressions:
 20 if (a*54+b) > sqr(c*4) then 200
 30 if a&1 != b|9 then 100
+
+NOTE: & is a bitwise logical and
+| is a bitwise logical or
+^ is a bitwise logical xor
 
 NOTE:
 Legal: 
@@ -321,7 +359,7 @@ is set by a define in dbasic.h and can be changed).
 
 10 rem enter 1,2 or 3
 20 input "enter 1,2 or 3",a
-25 rem NOTE: just a space between line numbers!
+25 rem NOTE: place a space between line numbers!
 30 on a goto 100 200 300 400
 40 print "entered ",a
 50 end
@@ -335,7 +373,8 @@ is set by a define in dbasic.h and can be changed).
 410 end
 
 The gosub/return stack size is limited to 20 levels
-of depth. Exceeding that returns an error.
+of depth. Exceeding that returns an error. (This
+is set by a define in dbasic.h and can be changed).
 
 
 
@@ -462,6 +501,14 @@ will occur.
 NOTE: you may see unexpected values for uninitalized 
 array variables. You will need to initialize them 
 before using them.
+10 dim a(100)
+20 for n=0 to 99
+30 let a(n)=0
+40 next n
+.
+.
+.
+(rest of program)
 
 
 
@@ -586,6 +633,7 @@ exponent exp(5.25), 2.7183^5.25 = 190.566
 Ready.
 
 
+
 --- INT() --- 
 
 10 let x=55.6
@@ -596,6 +644,8 @@ Ready.
 run
 number 55.6   int(55.6)=55
 Ready.
+
+
 
 --- ABS() --- 
 
@@ -609,6 +659,8 @@ number -25.5   absolute value 25
 Ready.
 
 NOTE: absolute values are an integer.
+
+
 
 --- SGN() ---
 
@@ -627,6 +679,20 @@ number 1   sign 1
 number 2   sign 1
 number 3   sign 1
 Ready.
+
+As a test for negative/0/positive numbers:
+5 rem test of sgn() and on/goto
+10 input "enter a number ";n
+20 let s=sgn(n)
+30 on s+2 goto 100 200 300
+40 print "should never be here"
+50 end
+100 print "Number ";n;" is negative"
+110 end
+200 print "Number ";n;" is 0"
+210 end
+300 print "Number ";n;" is positive"
+310 end
 
 
 
