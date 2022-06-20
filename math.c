@@ -24,11 +24,11 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <time.h>
 #include "dbasic.h"
 
 #define STACKMAX 20
 
-/* globals for this set of routines */
 
 
 /* return 1 if char is a number */
@@ -136,7 +136,7 @@ float eval(char *expr) {
 		/* test for math function (sin, tan, sqr, etc.) */
 		if (strlen(expr) >= 5) {
 			if (isalpha(*expr) && isalpha(*(expr+1))) {
-				int n=0;
+				int n=0; int pc=0;	// parens count for functions
 				memset(funcname,0,sizeof(funcname));
 				// get the name of the function up to ( 
 				while (1) {
@@ -144,13 +144,20 @@ float eval(char *expr) {
 					funcname[n] = *expr;
 					expr++; n++;
 				}
+				pc = 1;		// allow for nested function calls
 				expr++;		// skip initial (
 				// now get value inside ()
 				n=0;
 				memset(funcval,0,sizeof(funcval));
 				while (1) {
 					if (n > sizeof(funcval)) break;
-					if (*expr == ')') break;
+					if (*expr == '(') {	 // nested function
+						pc++;
+					}
+					if (*expr == ')') {
+						pc--;
+						if (pc == 0) break;
+					}
 					funcval[n] = *expr;
 					expr++; n++;
 				}
@@ -248,14 +255,48 @@ float eval(char *expr) {
 					fvalue = 0;
 					goto funcend;
 				}
+				/* RND() return random number between 0 and 1 */
+				if (strncmp(funcname,"rnd",3)==0) {
+					/* note: srandom is seeded in basic.c at start */
+					/* rnd(-1): reseed with a random number. */
+					/* rnd(0) or rnd(): no reseeding, return a random number */
+					/* rnd(1): reseed with a fixed value for repeatable results */
+					int seed = (int)eval(funcval);  // returns 0, nothing between ()
+					if (seed > 0) 
+						srandom(seed);		// fixed seed value
+					else if (seed == -1)
+						srandom(time(NULL)+random());
+					fvalue = (random() % 100000);
+					fvalue = fvalue / 100000.0;
+					goto funcend;
+				}
+				/* DEG() convert radian # to degree */
+				if (strncmp(funcname,"deg",3)==0) {
+					float tvalue = eval(funcval);
+					fvalue = tvalue * 180.0/3.141592654;
+					goto funcend;
+				}
+				/* RAD() convert decimal to radians */
+				if (strncmp(funcname,"rad",3)==0) {
+					float tvalue = eval(funcval);
+					fvalue = tvalue * 3.141592654/180.0;
+					goto funcend;
+				}
+				/* TAB(x) print number of spaces based on x value */
+				if (strncmp(funcname,"tab",3)==0) {
+					int tvalue = (int)eval(funcval);
+					for (int n=0; n<tvalue; n++) printf(" ");
+					fvalue = NAN;
+					goto funcend;
+				}
 
 
 				// not a recognized function
 				printf("Error - unknown numeric function %s\n",funcname);
 				error = -1;
 				return error;
-				// put function result in list
-				funcend:
+		
+funcend:		// put function result in list for later
 				val[valpos] = fvalue;
 				valpos++;
 				continue;

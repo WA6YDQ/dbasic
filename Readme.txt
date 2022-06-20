@@ -20,8 +20,8 @@ Logical:  a&b, a|b, a^b (bitwise and/or/xor)
 Functions: 
   SIN(), COS(), TAN(), ATN(), EXP(), 
   LN(), LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), 
-  ASC(), CHR$(), FNx, INT(), ABS(), SGN(), LEN()
-
+  ASC(), CHR$(), FNx, INT(), ABS(), SGN(), LEN(),
+  RND(), RND(n), RAD(), DEG(), TAB()
 
 To start, type dbasic [file.bas] or dbasic (no file given)
 
@@ -87,7 +87,7 @@ f=1.32696e+07
 All expressions are algabraic in order:
 Unary negation (-1) is highest.
 Expressions in parens are next: (a+b)*c 
-(a+b)*c is different from a+b*c. Parens can be nested.
+(a+b)*c is different from a+b*c.
 Powers have the next highest priority: 2**8
 Next is multiplication and division: 3*6/4
 Then is addition and subtraction: 4+5-3+9
@@ -164,5 +164,5 @@ Not Legal:
 Keep the test characters together if more than 1:
 <=, >=, !=, <>
 The keywords if/then must have a surrounding space.
-
+(Actually all keywords need a surrounding space).
 

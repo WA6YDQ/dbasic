@@ -13,7 +13,8 @@
  
  Functions: SIN(), COS(), TAN(), EXP(), LN(),
  LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
- CHR$(), FNx, INT(), ABS(), SGN(), ATN(), LEN()
+ CHR$(), FNx, INT(), ABS(), SGN(), ATN(), LEN(),
+ RND(), RAD(), DEC()
 
  Floating point numeric variables are a...z
  a(0)..a(10) ... z(0)..z(10) are pre-defined
@@ -26,8 +27,8 @@
  keywords: ON/GOSUB, FOPEN(), FCLOSE(), FREAD(), 
  FWRITE(), RANDOM(IZE)
  string functions: VAL()
- math functions: RND(),
- misc functions: TAB(), NOT(), RND(), TIME()
+ math functions: 
+ misc functions: TAB(), NOT(), TIME()
 
  (C) 2022 Kurt Theis <theis.kurt@gmail.com>
  This is licensed using the MIT license.
@@ -50,7 +51,7 @@
 #include "dbasic.h"
 #define _ISOC99_SOURCE
 #include <math.h>
-
+#include <time.h>
 
 /* global variables */
 char *buffer;					// memory buffer holding the basic program
@@ -325,6 +326,10 @@ int main(int argc, char **argv) {
 	signal(SIGINT, ignoreC);		// ignore ctrl-C
 
 	printf("dbasic - version %s\n",VERSION);
+
+	/* seed the random number functions */
+	srandom(time(NULL));	// will be the same if multiple runs in the same second
+	
 
 	/* set up memory for the basic statements */
 	buffer = malloc(BUFSIZE*sizeof(char));

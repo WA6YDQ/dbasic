@@ -1,0 +1,589 @@
+--- Starting dbasic ---
+
+You can start dbasic in two ways:
+
+dbasic
+
+dbasic [filename]
+
+Typing dbasic by itself on a line will start the BASIC 
+interpreter with an empty memory buffer and the prompt 
+'Ready.' displayed and await your input.
+
+Typing dbasic with a supplied filename:
+'dbasic test.bas'
+will load the basic source file 'test.bas' into dbasics
+memory buffer and begin executition of the BASIC statements
+included in the file. When the program terminates dbasic will
+exit and you will be returned back to the operating system.
+
+
+--- Interactive dbasic use ---
+
+Typing dbasic without a filename starts dbasic in the interactive 
+mode. You will be given a 'Ready.' prompt and dbasic will 
+await your commands.
+
+Commands are as follows:
+
+quit
+exit
+
+This terminates dbasic and returns you to your operating system.
+Any files in the dbasic buffer will be lost.
+
+save [filename]
+
+This saves the dbasic buffer to a disk file whose name you 
+supply in [filename]. The file extension .bas is recommended
+but not required.
+
+load [filename]
+
+This loads the disk file [filename] into the dbasic buffer.
+Any existing file in the buffer will be overwritten.
+
+new
+
+The new commands delete everything in dbasics buffer.
+
+free
+
+The free command shows available memory in dbasics buffer.
+The default is 65536 available bytes, but this can be changed
+as a define in the basic.c source code.
+
+list
+
+The list command displays the BASIC statements in the dbasic buffer.
+
+run
+
+The run command starts execution of the BASIC commands in the
+dbasic buffer. Execution will stop at the END command, the
+STOP command, or if the program statements do not continue
+with a loop such as GOTO or ON..GOTO.
+
+
+--- Entering BASIC program statements ---
+
+At the Ready. prompt, in addition to the above commands, any BASIC
+statement preceeded with a line number will be saved to dbasics 
+buffer. You can view these statements with the 'list' command.
+
+BASIC statements MUST have a line number. Statements cannot be entered
+by themselves.
+
+Example:
+10 rem This is a program
+20 for n = 1 to 10
+30 print n,n*n
+40 next n
+50 print "Done"
+99 end
+
+When entering a line, the statements will be saved in numerical order. 
+This means you can enter the above BASIC program starting at statement 99 
+and working backwords to line 10.
+
+If you enter a line number of an existing line by itself, the existing
+line will be deleted from the buffer. If you enter a different line with
+the same line number as an existing line, the original line will be 
+replaced by the new line.
+
+When you type 'run' the program will be run and the following output 
+will be generated:
+
+Ready.
+run
+1   1
+2   4
+3   9
+4   16
+5   25
+6   36
+7   49
+8   64
+9   81
+10   100
+done
+END statement in line 99
+Ready.
+
+If you want to save this program, type 
+save test1.bas
+
+Ready.
+save test1.bas
+File test1.bas Saved
+Ready.
+
+When you run a program, any statements that dbasic doesn't recognize
+will stop the program and a SYSTAX ERROR message along with the 
+offending line number will be displayed:
+
+SYNTAX ERROR: [40 list]
+End of buffer reached
+list
+10 rem
+20 rem
+30 print
+40 list
+Ready.
+
+In line 40 above, 'list' is not a valid BASIC statement.
+Also, note the 'End of buffer reached' message. This is
+dbasics way of telling you that there is no terminating
+END or STOP statement to end execution of the BASIC program.
+
+-------------------------------------
+---------- dbasic KEYWORDS ----------
+-------------------------------------
+
+The following BASIC statements are recognized as
+valid keywords by dbasic:
+
+
+--- REM ---
+10 rem	Everything after rem until line end is ignored
+20 rem  This is used to document your program
+
+--- PRINT ---
+10 print a,b,c
+20 print "a=";a,"b=";b
+30 print rnd(), sqr(2)*fna
+
+Semi-colons stop spacing and linefeeds when used at line end
+40 print "this is a te";
+50 print "st of the print statement"
+
+5 rem printing expressions
+10 print 25*sqr(9)*12*(3+4)
+
+Commas print 3 spaces, everything between double quotes " " 
+is printed as is.
+
+--- INPUT ---
+Get user input:
+10 rem get 3 numbers from the user
+20 input a,b,c
+
+10 rem again, but with a prompt:
+20 input "enter a,b,c: ",a,b,c
+
+10 rem get string from the user
+20 input "Enter a string: ",a$
+30 print "You entered ";a$
+
+--- LET ---
+Use the let keyword to assign variables:
+10 let a=5
+11 print a
+20 let a=5,b=10,c=20
+21 print a,b,c
+30 let a=rnd(), b=sqr(2)+456*(123+456)
+31 print a,b
+
+--- FOR/NEXT ---
+10 for n=1 to 10
+20 print n
+30 next n
+
+10 rem with the step keyword
+20 for n=10 to -10 step -1
+30 print n*n
+40 next n
+
+--- IF/THEN ---
+5 rem this program will stop at line 40
+10 let a=5
+20 if a=10 then 100
+30 print a
+40 end
+100 print "at line 100"
+110 end
+
+10 rem examples:
+20 if a>5 then 100
+30 if a<5 then 200
+40 if a>=10 then 300
+50 if a<=5 then 400
+60 if a!=5 then 500
+70 if a<>5 then 500
+
+10 rem with expressions:
+20 if (a*54+b) > sqr(c*4) then 200
+30 if a&1 != b|9 then 100
+
+--- GOTO/GOSUB/RETURN ---
+10 input "enter a number: ";a
+20 if a=0 then 200
+30 gosub 100
+40 goto 10
+100 print "you entered ";a
+110 return
+200 end
+
+--- ON GOTO ---
+10 rem enter 1,2 or 3
+20 input "enter 1,2 or 3",a
+30 on a goto 100 200 300 400
+40 print "entered ",a
+50 end
+100 print "at line 100"
+110 end
+200 print "at line 200"
+210 end
+300 print "at line 300"
+310 end
+400 print "at line 400"
+410 end
+
+
+--- READ/DATA/RESTORE ---
+
+10 for n=1 to 6
+20 read a
+30 print a
+40 next n
+50 end
+100 data 100,200,300,400,500,600
+
+10 rem this will fail:
+20 for n=1 to 5
+30 read a
+40 print a
+50 next a
+60 end
+100 data 1,2,3
+110 rem note there is not enough data for the read
+
+10 rem this will work
+20 let n=1
+30 read a
+40 print a
+50 let n=n+1
+60 if n<5 then 30
+70 restore
+80 if n=10 then 100
+90 goto 30
+100 end
+110 data 100,200,300,400
+ 
+run
+100
+200
+300
+400
+100
+100
+100
+100
+100
+Ready.
+
+Thge logic of the program does a restore when n>=5 which
+is why you get the string of 100's.
+
+--- DEF ---
+
+5 rem Define a user function:
+10 def fnf 1/(2*3.14159*sqr(l*c))
+20 input "Enter inductance uh: ";l
+30 input "Enter capacitance pf: ";c
+40 let f=fnf
+50 print fnf
+60 end
+run
+Enter inductance uh: ?1.2e-6
+Enter capacitance pf: ?220e-12
+9.79532e+06
+Ready.
+
+This shows that a resonant circuit with an inductance of 1.2 uH
+and a capacitance of 220 pf resonates at 9.795 MHz
+
+5 rem functions can be nested:
+10 def fna a*2
+20 def fnb b*fna
+30 input "enter a";a
+40 input "enter b";b
+50 let c=fnb
+60 print c
+run
+enter a?2
+enter b?3
+12
+Ready.
+
+--- DIM ---
+
+5 rem set up & initialize an array
+10 let c=200
+20 dim a(c)
+30 for n=0 to c-1
+40 let a(n)=n
+50 next n
+55 print "a(150)=";a(150)
+60 if a(150) != 150 then 200
+70 end
+200 print "Bad Array element"
+210 end
+
+Arrays only work on numbers a(x)...z(x)
+and not strings.
+The array subscript is limited only by available 
+memory. 
+10 dim a(1e6)
+assigns 1 million array elements to a.
+
+Arrays can be re-dimmed upwards. No data loss
+will occur.
+10 dim a(20)
+20 let a(19) = 19
+25 print "a(19)=";a(19)
+30 dim a(30)
+40 let a(29) = 29
+50 for n=0 to 29
+60 print "a(";n;")=";a(n)
+70 next n
+99 end
+
+NOTE: you may see unexpected values for uninitalized 
+array variables. You will need to initialize them 
+before using them.
+
+--- STOP ---
+
+10 let a=1
+20 print a
+30 let a=a+1
+40 if a<20 then 20
+50 stop
+
+The STOP keyword stops program execution. Stop
+functions the same as the END keyword, but
+prints a message whereas END does not.
+
+
+
+--------------------------------------------------
+------------------ FUNCTIONS ---------------------
+--------------------------------------------------
+
+--- SIN(), COS(), TAN(), ATN() ---
+
+10 let s=sin(12)
+20 print "sin(12) in radians = ";s
+30 let c=cos(12)
+40 print "cos(12) in radians = ";c
+50 let t=tan(12)
+60 print "tan(12) in radians = ";t
+70 let a=atn(12)
+80 print "arctan(12) in radians = ";a
+99 end
+
+run
+sin(12) in radians = -0.536573
+cos(12) in radians = 0.843854
+tan(12) in radians = -0.63586
+arctan(12) in radians = 1.48766
+Ready.
+
+
+--- SQR(), LOG(), LN(), EXP() ---
+
+10 let s=sqr(2)
+20 let l=log(25)
+30 let n=ln(43)
+40 let e=exp(5.25)
+50 print "square root of 2 = ";s
+60 print "log base 10 log(25) = ";l
+70 print "natural log ln(42) = ";n
+80 print "exponent exp(5.25), 2.7183^5.25 = ";e
+99 end
+
+run
+square root of 2 = 1.41421
+log base 10 log(25) = 1.39794
+natural log ln(42) = 3.7612
+exponent exp(5.25), 2.7183^5.25 = 190.566
+Ready.
+
+
+--- INT() --- 
+
+10 let x=55.6
+20 let i=int(x)
+30 print "number ";x,"int(";x;")=";i
+99 end
+
+run
+number 55.6   int(55.6)=55
+Ready.
+
+--- ABS() --- 
+
+10 let n=-25.5
+20 let a=abs(n)
+30 print "number ";n,"absolute value ";a
+99 end
+
+run
+number -25.5   absolute value 25
+Ready.
+
+NOTE: absolute values are an integer.
+
+--- SGN() ---
+
+10 for n=-3 to 3
+20 let s=sgn(n)
+30 print "number ";n,"sign ";s
+40 next n
+50 end
+
+run
+number -3   sign -1
+number -2   sign -1
+number -1   sign -1
+number 0   sign 0
+number 1   sign 1
+number 2   sign 1
+number 3   sign 1
+Ready.
+
+
+
+--- RND(), RND(-1), RND(n) ---
+
+rnd() and rnd(0) returns a psuedo random number from 0 thru 1.0
+with a very high period.
+
+When dbasic is started, a random seed is loaded so that 
+with each start of dbasic a different sequence of random
+numbers will be generated.
+
+rnd(-1) sets a new random seed.
+
+rnd(n) where n is a positive integer > 0 will set a seed,
+but the random number sequence will be repeatable (useful
+for testing).
+
+10 rem print 5 random numbers
+15 print "random at start"
+20 for n=1 to 5
+30 print rnd()
+40 next n
+50 rem set a repeatable seed
+55 print "repeatable"
+60 let r=rnd(1)
+70 for n=1 to 5
+80 print rnd()
+90 next n
+100 rem again
+105 print "repeatable (again)"
+106 let r=rnd(1)
+110 for n=1 to 5
+120 print rnd()
+130 next n
+140 rem set a new seed
+145 print "new seed"
+150 let r=rnd(-1)
+160 for n=1 to 5
+170 print rnd()
+180 next n
+200 end
+
+run
+random at start
+0.30926
+0.91181
+0.46333
+0.6255
+0.28547
+repeatable
+0.30886
+0.92777
+0.36915
+0.47793
+0.38335
+repeatable (again)
+0.30886
+0.92777
+0.36915
+0.47793
+0.38335
+new seed
+0.1591
+0.05966
+0.09247
+0.07429
+0.12015
+Ready.
+
+
+
+--- Character Variables a$...z$ ---
+
+--- LEFT$(), MID$(), RIGHT$() ---
+
+10 let a$="abcdefghijklmnopqrstuvwxyz"
+20 print a$
+30 rem left string: left$(string name, number of chars)
+40 let l$=left$(a$,3)
+50 print "left string:",l$
+60 rem right string: right$(string name, number of chars)
+70 let r$=right$(a$,3)
+75 print "right string:",r$
+80 rem mid string: mid$(string name,start position, char count)
+90 let m$=mid$(a$,3,2)
+100 print "mid string:",m$
+110 end
+ 
+run
+abcdefghijklmnopqrstuvwxyz
+left string:   abc
+right string:   xyz
+mid string:   cd
+Ready.
+
+--- CHR$() ---
+
+10 rem chr$(n) - show ascii characters based on digit value
+20 for n=32 to 127 
+30 let a$=chr$(n)
+40 print a$;
+50 next n
+60 print
+99 end
+
+run
+ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
+Ready.
+
+--- ASC() ---
+
+10 rem return the numeric value of the supplied character
+20 let n=asc("a")
+30 print n
+40 rem another example
+50 let a$="Z"
+60 let n=asc(a$)
+70 print n
+99 end
+
+run
+97
+90
+Ready.
+
+--- TAB() ---
+
+The tab function prints tab(x) number of spaces where
+x is a positive integer > 0
+
+10 print tab(10)
+
+
+
