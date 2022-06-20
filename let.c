@@ -26,7 +26,7 @@ int run_let(char *line) {
 	/* format: 100 LET a=5, b=a*10+3, a$="this is a test"\n\0 */
 
 	while (1) {
-		if (*line == '\0') return 0;		// EOL
+		if (*line == '\0' || *line == '\n') return 0;		// EOL
 		if (*line == ',') {					// comma seperator
 			line++;
 			continue;
@@ -137,7 +137,7 @@ int run_let(char *line) {
 		/* unknown char */
 		printf("unknown character in LET statement [%c]\n",*line);
 		line++;
-		continue;
+		return -1;
 	}
 
 	printf("Error - unknown error in LET\n");

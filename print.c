@@ -71,8 +71,8 @@ int run_print(char *line) {
 		}
 		/* test numeric expression */
 		res = eval(expr);
-		/* TAB() returns NAN - ignore this */
-		if (strncmp(expr,"tab(",4)==0 && isnan(res)) continue;
+		/* SPC() returns NAN - ignore this */
+		if (strncmp(expr,"spc(",4)==0 && isnan(res)) continue;
 		if (error == -1) {
 			printf("\nError - eval error in print()\n");
 			return -1;

@@ -21,7 +21,7 @@ Functions:
   SIN(), COS(), TAN(), ATN(), EXP(), 
   LN(), LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), 
   ASC(), CHR$(), FNx, INT(), ABS(), SGN(), LEN(),
-  RND(), RND(n), RAD(), DEG(), TAB()
+  RND(), RND(n), RAD(), DEG(), SPC(), PI()
 
 To start, type dbasic [file.bas] or dbasic (no file given)
 

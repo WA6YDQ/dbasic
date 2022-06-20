@@ -14,7 +14,7 @@
  Functions: SIN(), COS(), TAN(), EXP(), LN(),
  LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
  CHR$(), FNx, INT(), ABS(), SGN(), ATN(), LEN(),
- RND(), RAD(), DEC()
+ RND(), RAD(), DEC(), SPC()
 
  Floating point numeric variables are a...z
  a(0)..a(10) ... z(0)..z(10) are pre-defined
@@ -25,10 +25,10 @@
 
  TODO: 
  keywords: ON/GOSUB, FOPEN(), FCLOSE(), FREAD(), 
- FWRITE(), RANDOM(IZE)
+ FWRITE()
  string functions: VAL()
  math functions: 
- misc functions: TAB(), NOT(), TIME()
+ misc functions: NOT(), TIME(), TAB()
 
  (C) 2022 Kurt Theis <theis.kurt@gmail.com>
  This is licensed using the MIT license.

@@ -5,7 +5,7 @@
 30 let x=deg(sin(n))
 32 let x=x/5
 33 let x=x+30
-40 print tab(x);"*"
+40 print spc(x);"*"
 50 next n
 60 goto 20
 99 end

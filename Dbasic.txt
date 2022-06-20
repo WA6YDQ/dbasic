@@ -373,6 +373,9 @@ prints a message whereas END does not.
 
 --- SIN(), COS(), TAN(), ATN() ---
 
+The functions sin(), cos(), tan(), atn() all return the value
+in radians. Use deg() to convert to degrees if needed.
+
 10 let s=sin(12)
 20 print "sin(12) in radians = ";s
 30 let c=cos(12)
@@ -389,6 +392,38 @@ cos(12) in radians = 0.843854
 tan(12) in radians = -0.63586
 arctan(12) in radians = 1.48766
 Ready.
+
+
+--- DEG(), RAD() ---
+
+The function deg() converts the given value
+to degrees:
+10 let d=deg(1.57)
+20 print d
+30 end
+run
+89.9544
+Ready.
+
+The function rad() converts the given value
+to radians:
+10 let r=rad(89.95)
+20 print r
+30 end
+run
+1.56992
+Ready.
+
+
+--- PI() ---
+
+Returns the value of pi. 
+NOTE: A dummy variable is required between ().
+An error will be returned without it. The 
+dummy value is not used.
+
+10 let p=pi(0)
+20 print p
 
 
 --- SQR(), LOG(), LN(), EXP() ---
@@ -578,12 +613,21 @@ run
 90
 Ready.
 
---- TAB() ---
+--- SPC() ---
 
-The tab function prints tab(x) number of spaces where
+The spc function prints spc(x) number of spaces where
 x is a positive integer > 0
 
 10 print tab(10)
+
+5 rem print a sine wave. use ctrl-c to exit
+10 for n=0 to 2*pi(0) step (pi(0)/60)
+20 let d=deg(sin(n))
+25 rem scale to fit on the display
+30 let d=(d+58)/2.5
+40 print spc(d);"*"
+50 next n
+60 goto 10
 
 
 

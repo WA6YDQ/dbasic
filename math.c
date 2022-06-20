@@ -282,13 +282,21 @@ float eval(char *expr) {
 					fvalue = tvalue * 3.141592654/180.0;
 					goto funcend;
 				}
-				/* TAB(x) print number of spaces based on x value */
-				if (strncmp(funcname,"tab",3)==0) {
+				/* SPC(x) print number of spaces based on x value */
+				if (strncmp(funcname,"spc",3)==0) {
 					int tvalue = (int)eval(funcval);
+					if (tvalue < 0) tvalue = 0;
+					if (tvalue > 79) tvalue = 79;
 					for (int n=0; n<tvalue; n++) printf(" ");
-					fvalue = NAN;
+					fvalue = NAN;		// don't actually return a value
 					goto funcend;
 				}
+				/* PI() return pi */
+				if (strncmp(funcname,"pi",2)==0) {
+					fvalue = 3.141592654;
+					goto funcend;
+				}
+
 
 
 				// not a recognized function
