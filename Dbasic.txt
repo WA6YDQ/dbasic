@@ -36,22 +36,23 @@ save [filename]
 
 This saves the dbasic buffer to a disk file whose name you 
 supply in [filename]. The file extension .bas is recommended
-but not required.
+but not required. The filename is a path (can include directories).
 
 load [filename]
 
 This loads the disk file [filename] into the dbasic buffer.
 Any existing file in the buffer will be overwritten.
+The filename is a path (can include directories).
 
 new
 
-The new commands delete everything in dbasics buffer.
+The new commands delete everything in the BASIC buffer.
 
 free
 
-The free command shows available memory in dbasics buffer.
+The free command shows available memory in the BASIC buffer.
 The default is 65536 available bytes, but this can be changed
-as a define in the basic.c source code.
+as a define in the dbasic.h header.
 
 list
 
@@ -82,6 +83,12 @@ Example:
 50 print "Done"
 99 end
 
+Line numbers are required. All lines entered or loaded
+from a file are converted to lower case (except between
+double quotes "" are left alone). All user commands 
+are lower case. Filenames for save and load can be upper
+or lower case or mixed case.
+
 When entering a line, the statements will be saved in numerical order. 
 This means you can enter the above BASIC program starting at statement 99 
 and working backwords to line 10.
@@ -107,7 +114,6 @@ run
 9   81
 10   100
 done
-END statement in line 99
 Ready.
 
 If you want to save this program, type 
@@ -136,6 +142,34 @@ Also, note the 'End of buffer reached' message. This is
 dbasics way of telling you that there is no terminating
 END or STOP statement to end execution of the BASIC program.
 
+Numeric variables are single letter, a...z
+All numeric variables are floating point. Use
+the INT() function to change the type.
+
+String variables are single letter, a$...z$
+
+Numeric variables and string variables do not share the
+same memory space.
+
+All expressions are algabraic in order:
+Unary negation (-1) is highest.
+Expressions in parens are next: (a+b)*c 
+(a+b)*c is different from a+b*c.
+Powers have the next highest priority: 2**8
+Next is multiplication and division: 3*6/4
+Then is addition and subtraction: 4+5-3+9
+Lowest priority are logical functions (&, |, ^) 
+
+Parenthesises can be nested:
+10 let a=(1+2)*(2+(3*4+(43821+5)))
+20 print a
+99 end
+run
+131520
+
+While running, hitting ctrl-C will stop execution. If the
+user is in an input loop, hit ctrl-C then press the enter key.
+
 -------------------------------------
 ---------- dbasic KEYWORDS ----------
 -------------------------------------
@@ -145,10 +179,14 @@ valid keywords by dbasic:
 
 
 --- REM ---
+
 10 rem	Everything after rem until line end is ignored
 20 rem  This is used to document your program
 
+
+
 --- PRINT ---
+
 10 print a,b,c
 20 print "a=";a,"b=";b
 30 print rnd(), sqr(2)*fna
@@ -163,7 +201,10 @@ Semi-colons stop spacing and linefeeds when used at line end
 Commas print 3 spaces, everything between double quotes " " 
 is printed as is.
 
+
+
 --- INPUT ---
+
 Get user input:
 10 rem get 3 numbers from the user
 20 input a,b,c
@@ -175,7 +216,10 @@ Get user input:
 20 input "Enter a string: ",a$
 30 print "You entered ";a$
 
+
+
 --- LET ---
+
 Use the let keyword to assign variables:
 10 let a=5
 11 print a
@@ -184,7 +228,18 @@ Use the let keyword to assign variables:
 30 let a=rnd(), b=sqr(2)+456*(123+456)
 31 print a,b
 
+
+NOTE: The LET keyword is NOT optional as in some BASIC's.
+The line:
+10 a=100
+will NOT work. Instead use:
+10 let a=100
+
+
+
+
 --- FOR/NEXT ---
+
 10 for n=1 to 10
 20 print n
 30 next n
@@ -194,7 +249,12 @@ Use the let keyword to assign variables:
 30 print n*n
 40 next n
 
+NOTE: for/next loops CANNOT be nested. This may change
+in future releases.
+
+
 --- IF/THEN ---
+
 5 rem this program will stop at line 40
 10 let a=5
 20 if a=10 then 100
@@ -215,7 +275,27 @@ Use the let keyword to assign variables:
 20 if (a*54+b) > sqr(c*4) then 200
 30 if a&1 != b|9 then 100
 
+NOTE:
+Legal: 
+10 if a<10 then 20
+10 if a < 10 then 20
+10 if a>=10 then 20
+
+Not Legal:
+10 if a !   = 10 then 20
+10 if a!  =10 then 20
+10 if a<>10 then20
+10 ifa>10then 20
+
+Keep the test characters together if more than 1:
+<=, >=, !=, <>
+The keywords if/then must have a surrounding space.
+(Actually all keywords need a surrounding space).
+
+
+
 --- GOTO/GOSUB/RETURN ---
+
 10 input "enter a number: ";a
 20 if a=0 then 200
 30 gosub 100
@@ -232,9 +312,13 @@ Variables also work in place of goto/gosub line numbers:
 110 end
 
 The gosub/return stack size is limited to 20 levels
-of depth. Exceeding that returns an error.
+of depth. Exceeding that returns an error. (This
+is set by a define in dbasic.h and can be changed).
+
+
 
 --- ON GOTO ---
+
 10 rem enter 1,2 or 3
 20 input "enter 1,2 or 3",a
 25 rem NOTE: just a space between line numbers!
@@ -252,6 +336,8 @@ of depth. Exceeding that returns an error.
 
 The gosub/return stack size is limited to 20 levels
 of depth. Exceeding that returns an error.
+
+
 
 --- READ/DATA/RESTORE ---
 
@@ -295,8 +381,10 @@ run
 100
 Ready.
 
-Thge logic of the program does a restore when n>=5 which
+The logic of the program does a restore when n>=5 which
 is why you get the string of 100's.
+
+
 
 --- DEF ---
 
@@ -329,7 +417,16 @@ enter b?3
 12
 Ready.
 
+
+NOTE: You may get slightly differing results when calculating using 
+defined functions vs calculating directly. This is due to rounding 
+errors in the floating point routines of the CLIB libraries.
+
+
 --- DIM ---
+
+By default, all numeric variables are set up
+with arrays of size 11: a(0) thru a(10) thru z(0) thru z(10).
 
 5 rem set up & initialize an array
 10 let c=200
@@ -366,6 +463,8 @@ NOTE: you may see unexpected values for uninitalized
 array variables. You will need to initialize them 
 before using them.
 
+
+
 --- STOP ---
 
 10 let a=1
@@ -378,6 +477,34 @@ The STOP keyword stops program execution. Stop
 functions the same as the END keyword, but
 prints a message whereas END does not.
 
+
+--- END ---
+
+Normal execution of a BASIC program stops when 
+the END statement is reached.
+
+10 print a
+20 end
+
+
+
+--- CLEAR ---
+
+The clear statement clears all variables. Normally
+not used in a BASIC program but included for completeness.
+
+10 let a=5
+20 print a
+30 clear
+40 print a
+50 end
+run
+5
+0
+Ready.
+
+
+ 
 
 
 --------------------------------------------------
@@ -629,9 +756,7 @@ Ready.
 --- SPC() ---
 
 The spc function prints spc(x) number of spaces where
-x is a positive integer > 0
-
-10 print tab(10)
+x is a positive integer > 0.
 
 5 rem print a sine wave. use ctrl-c to exit
 10 for n=0 to 2*pi(0) step (pi(0)/60)
