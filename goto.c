@@ -43,7 +43,7 @@ int run_ongoto(char *line) {	// return line number based on variable
 	if (res > n) return 0;		// only 30 line numbers allowed
 
 	// element2 is 'goto'
-	if (!(strcmp(temp[2],"goto")==0 || strcmp(temp[2],"gosub"))) {
+	if (!(strcmp(temp[2],"goto")==0 || strcmp(temp[2],"gosub")==0)) {
 		printf("Error - expected GOTO/GOSUB in statement\n");
 		return -1;
 	}

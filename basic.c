@@ -3,7 +3,7 @@
  Statements in this version of BASIC:
  REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
  IF/THEN, FOR/NEXT/STEP, INPUT, READ, DATA,
- RESTORE, ON/GOTO, CLEAR, STOP, DEF
+ RESTORE, ON/GOTO, ON/GOSUB, CLEAR, STOP, DEF
 
  Formulas: a+b, a-b, a*b, a/b, a**b, -a
  
@@ -24,8 +24,7 @@
  Case is preserved when between double quotes ""
 
  TODO: 
- keywords: ON/GOSUB, FOPEN(), FCLOSE(), FREAD(), 
- FWRITE()
+ keywords: FOPEN(), FCLOSE(), FREAD(), FWRITE()
  string functions: VAL()
  math functions: 
  misc functions: NOT(), TIME(), TAB()
@@ -59,7 +58,9 @@ char CharVars[26][LINESIZE];	// a$ thru z$, max 80 chars long each
 int pos = 0;					// current end position of the buffer
 int currentlinenumber = 0;		// line number of the current line being tested
 int lineptr = 0;				// current buffer position during run loop
-int returnlinenumber = 0;		// position in buffer when RETURN command issued
+// position in buffer when RETURN command issued
+int returnlinenumber[GOSUBSTACKSIZE];
+int returnPos = 0;				
 float index_start = 0;			// FOR/NEXT start index
 float index_end = 0;			// FOR/NEXT end index
 float index_step = 0;			// FOR/NEXT step index
@@ -169,6 +170,23 @@ gsrloop:
 }
 
 
+/***** GETNEXTLINENUMBER *******/
+int getNextLineNumber() {
+	/* get & save the line number following the current line */
+	/* This only works when called from the parse loop */
+    int i=lineptr, x=0;             // skip current line
+    while (buffer[i++] != '\n');
+    char tmpline[LINESIZE]={};      // next line
+    while (1) {
+    	tmpline[x] = buffer[i+x];   // fill temp line
+        if (tmpline[x]=='\n') break;
+            x++;
+    }
+    char linen[6];
+    sscanf(tmpline,"%s",linen);     // get line number of next line
+    return atoi(linen);
+}
+
 
 /******************** PARSE *************************/
 /* read a line, parse it and execute basic commands */
@@ -180,11 +198,10 @@ gsrloop:
 
 int parse(char *line) {
 	int res = 0;
-	int show2();
-	char linenum[6],word[40];
+	char linenum[6],word[40], word2[40],word3[40];
 	sscanf(line,"%s %s",linenum,word);	// get line number and 1st command
 
-	if (strcmp(word,"rem")==0) {		// ignore remarks
+	if (strcmp(word,"rem")==0) {		// ignore this line
 		return 0;
 	}
 
@@ -240,31 +257,43 @@ int parse(char *line) {
 		return run_goto(line);			// return the line number
 	}
 	if (strcmp(word,"on")==0) {			// goto.c
-		return run_ongoto(line);
+		sscanf(line,"%s %s %s %s",linenum,word,word2,word3);	// get goto/gosub after on
+		if (strcmp(word3,"goto")==0) 		// on goto
+			return run_ongoto(line);
+		if (strcmp(word3,"gosub")==0) {	// on gosub
+			/* get & save the line number following this line */
+        	returnlinenumber[returnPos] = getNextLineNumber();
+			returnPos++;
+			if (returnPos > GOSUBSTACKSIZE) {
+				printf("Error - return stack full\n");
+				return -1;
+			}
+			return run_ongoto(line);
+		}	
 	}
 	if (strcmp(word,"gosub")==0) {		// gosub.c
-		/* save the line number following this line */
-		int i=lineptr, x=0;				// skip current line
-		while (buffer[i++] != '\n');
-		char tmpline[LINESIZE]={};		// next line
-		while (1) {
-			tmpline[x] = buffer[i+x];	// fill temp line
-			if (tmpline[x]=='\n') break;
-			x++;
+		/* get & save the line number following this line */
+		returnlinenumber[returnPos] = getNextLineNumber();
+		returnPos++;
+		if (returnPos > GOSUBSTACKSIZE) {
+			printf("Error - return stack full\n");
+			return -1;
 		}
-		char linen[6];
-		sscanf(tmpline,"%s",linen);		// get line number of next line
-		returnlinenumber = atoi(linen);
 		return run_goto(line);			// return the line number (goto/gosub functionally same)
 	}
 	if (strcmp(word,"return")==0) {		// return from subroutine
-		return returnlinenumber;
+		returnPos--;
+		if (returnPos < 0) {
+			printf("Error - return without gosub\n");
+			return -1;
+		}
+		return returnlinenumber[returnPos];
 	}
 	if (strcmp(word,"if")==0) {			// IF/THEN: ifthen.c
 		return run_ifthen(line);
 	}
 	if (strcmp(word,"for")==0) {		// for/next  fornext.c
-		// get/save the line # of the next line
+		// get & save the line # of the next line
 		int i=lineptr, x=0;
 		while (buffer[i++] != '\n');
 		char tmpline[LINESIZE]={};
@@ -330,6 +359,10 @@ int main(int argc, char **argv) {
 	/* seed the random number functions */
 	srandom(time(NULL));	// will be the same if multiple runs in the same second
 	
+	/* set up the return stack (gosub's) */
+	/* this is repeated in the parse loop */
+	for (int n=0; n<20; n++) returnlinenumber[n] = 0;
+	returnPos = 0;
 
 	/* set up memory for the basic statements */
 	buffer = malloc(BUFSIZE*sizeof(char));
@@ -486,6 +519,11 @@ runit:
 		LOADFLAG=0;
 		goto runloop;
 	}
+
+	/* set up the return stack (gosub's) */
+    for (int n=0; n<20; n++) returnlinenumber[n] = 0;
+    returnPos = 0;
+
 
 parseLoop:
 	memset(line,0,LINESIZE);
