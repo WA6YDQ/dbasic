@@ -9,7 +9,7 @@ The binary 'dbasic' will be installed in /usr/local/bin
 Statements in this version of BASIC:
  REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
  IF/THEN, FOR/NEXT/STEP, INPUT, READ, DATA,
- RESTORE, ON/GOTO, CLEAR, STOP, DEF FNx
+ RESTORE, ON/GOTO, ON/GOSUB, CLEAR, STOP, DEF FNx
 
 Expressions: a+b, a-b, a*b, a/b, a**b, -a
  
