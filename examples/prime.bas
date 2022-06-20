@@ -1,7 +1,7 @@
 10 rem prime.bas
 11 rem run the sieve of erastosthenes program
 12 rem this returns 1899 primes in about 1 second
-13 on a raspberry pi 4 running dbasic
+13 rem on a raspberry pi 4 running dbasic
 20 let s=8190
 30 dim f(8191)
 40 print "1 iteration"
