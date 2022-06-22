@@ -777,6 +777,21 @@ Ready.
 
 --- Character Variables a$...z$ ---
 
+In addition to left$() etc you can catenate strings
+using the + operator:
+
+10 let a$="abcdefg"
+20 let b$="<<<"+left$(a$,2)+" "+mid$(a$,3,2)+" "+right$(a$,2)+">>>"
+30 print a$
+40 print b$
+99 end
+run
+abcdefg
+<<<ab cd fg>>>
+Ready.
+
+
+
 --- LEFT$(), MID$(), RIGHT$() ---
 
 10 let a$="abcdefghijklmnopqrstuvwxyz"

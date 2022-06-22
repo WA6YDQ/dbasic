@@ -21,10 +21,15 @@ Functions:
   SIN(), COS(), TAN(), ATN(), EXP(), 
   LN(), LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), 
   ASC(), CHR$(), FNx, INT(), ABS(), SGN(), LEN(),
-  RND(), RND(n), RAD(), DEG(), SPC(), PI()
+  RND(), RND(n), RAD(), DEG(), SPC(), PI(), VAL()
+
+In addition the + operator can be used to catenate
+text strings (a$...z$).
 
 Please see the file Dbasic.txt for usage instructions 
 and examples.
+
+-----------------------------------------------------------
 
 To start, type dbasic [file.bas] or dbasic (no file given)
 
