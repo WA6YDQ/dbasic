@@ -76,11 +76,10 @@ float eval(char *expr) {
 	extern int NumSize[26];
 
 	int NEGFLAG=0;		// true when unary - found
-	//int MATHFLAG=0;		// true when pending math operation
 
-	float val[STACKMAX];		// holds object values
+	float val[STACKMAX]={};		// holds object values
 	int valpos = 1;
-	char mathchr[STACKMAX];		// holds math expressions
+	char mathchr[STACKMAX]={};		// holds math expressions
 	int mathchrpos = 1;
 
 	char funcname[20] = {};
@@ -296,8 +295,31 @@ float eval(char *expr) {
 					fvalue = 3.141592654;
 					goto funcend;
 				}
-
-
+				/* VAL() - return the numeric value of the given string */
+				/* ex: val("2*x+(3*pi(0)/sin(a))-4)    */
+				/* let a$="1/34*75+sin(8)" : let a=val(a$) */
+				if (strncmp(funcname,"val",3)==0) {
+					/* test for a string variable */
+					if (funcval[0] >= 'a' && funcval[0] <= 'z' && funcval[1] == '$') {
+						fvalue = eval(CharVars[funcval[0]-'a']);
+						goto funcend;
+					}
+					/* test for a quoted string */
+					if (funcval[0] == '"') {
+						char temp[LINESIZE]={}; int n=0;
+						while (1) {
+							if (funcval[n+1] == '"') break;
+							temp[n] = funcval[n+1];
+							n++;
+						}
+						temp[n] = '\0';
+						fvalue = eval(temp);
+						goto funcend;
+					}
+					/* try all between () */
+					fvalue = eval(funcval);
+					goto funcend;
+				}
 
 				// not a recognized function
 				printf("Error - unknown numeric function %s\n",funcname);
@@ -350,14 +372,14 @@ funcend:		// put function result in list for later
 			expr++;
 			if (*expr == '(') {		// using subscript
 				expr++;				// point past (
-				char SUBNUM[8]={}; int n=0;
+				char SUBNUM[12]={}; int n=0;
 				while (1) {
 					if (*expr == ')') break;
 					SUBNUM[n] = *expr;
 					expr++; n++;
 				}
-				subscript = eval(SUBNUM);
-			//printf("eval: subscript %d\n",subscript);
+				subscript = (int)eval(SUBNUM);
+		//printf("eval: subscript %d\n",subscript);
 				expr++;
 			}
 			// error bounds checking
@@ -399,7 +421,7 @@ funcend:		// put function result in list for later
 		/* see if expression is enclosed by parenthesis: group them and eval */
         if (*expr == '(') {
 			expr++;         // skip opening parens
-            int n=0; char temp[80]; 
+            int n=0; char temp[80]={}; 
 			memset(temp,0,sizeof(temp));
             int parencount=1;
 			while (1) {
@@ -474,6 +496,9 @@ funcend:		// put function result in list for later
 }
 
 
+
+
+/****** EVALSTRING() *********/
 /* evaluate string expressions */
 char *evalstring(char *line) {
 
@@ -482,19 +507,65 @@ char *evalstring(char *line) {
 	extern float *NumVar[26];
 	extern int error;
 	error = 0;
+	char chrvar = '\0';
 	char temp[LINESIZE]={};
 	int n=0;
+
+	memset(tempCharVar,0,LINESIZE);
+evalstrLoop:
+
+	if (*line == '\0' || *line == '\n')     // assignment complete
+        return tempCharVar;
+
+	/* ignore spaces outside quotes */
+	if (*line == ' ') {
+		line++;
+		goto evalstrLoop;
+	}
+
+	/* test for single letter variables */
+	if (*line >= 'a' && *line <= 'z' && *(line+1) == '$') {
+		chrvar = *line; line += 2;
+		strcat(tempCharVar,CharVars[chrvar-'a']);
+	}
+	
+	if (*line == '+') {		// catenation
+		line++;
+		goto evalstrLoop;
+	}
+
+	if (*line == '"') {		// get everything between " "
+		line++;				// skip "
+		while (1) {
+			if (*line == '"') break;
+			strncat(tempCharVar,line,1);
+			line++;
+		}
+		line++;		// skip "
+		goto evalstrLoop;
+	}
+
+
+	/* test if functions */
+	n=0; memset(temp,0,sizeof(temp));
 	while (1) {
 		if (*line == '(') break;	// get function until (
 		temp[n] = *line;
 		n++; line++;
+		if (n > LINESIZE) {
+			printf("Error - excessive characters in string\n");
+			error = -1;
+			return "";
+		}
 	}
+
+	/* ---------------------------------------------- */
 
 	/* LEFT$(X$,C) */
 	if (strncmp(temp,"left$",5)==0) {
-		// left$(a$,3)
+		// ie. left$(a$,3)
 		line++;		// skip (
-		if (!(*line >= 'a' && *line <= 'a' && *(line+1) == '$')) {
+		if (!(*line >= 'a' && *line <= 'z' && *(line+1) == '$')) {
 			printf("Error - expected character variable in left$()\n");
 				error = -1;
 				return "";
@@ -518,24 +589,27 @@ char *evalstring(char *line) {
 			tmpnum[n] = *line;
 			n++; line++;
 		}
+		line++;		// skip )
 		int val = eval(tmpnum);
 		if (val == 0) 
 			return "";
 		// get chars from 0 thru tmpnum
-		memset(tempCharVar,0,LINESIZE);
 		n=0;
 		while (n < val) {
-			tempCharVar[n] = CharVars[strchr-'a'][n];
+			//tempCharVar[n] = CharVars[strchr-'a'][n];
+			strncat(tempCharVar,&CharVars[strchr-'a'][n],1);
 			n++;
 		}
-		return tempCharVar;
+		goto evalstrLoop;
 	}
+
+	/* --------------------------------------------- */
 
 	/* RIGHT$(X$,C) */
 	if (strncmp(temp,"right$",6)==0) {
-        // right$(a$,3)
+		// ie. right$(a$,3)
         line++;     // skip (
-        if (!(*line >= 'a' && *line <= 'a' && *(line+1) == '$')) {
+        if (!(*line >= 'a' && *line <= 'z' && *(line+1) == '$')) {
             printf("Error - expected character variable in right$()\n");
                 error = -1;
                 return "";
@@ -558,28 +632,31 @@ char *evalstring(char *line) {
             }
             tmpnum[n] = *line;
             n++; line++;
-        }
+		}
+		line++;		// skip )
         int val = eval(tmpnum);
         if (val == 0)  
             return ""; 
 		// get the last (val) chars of x$
-        memset(tempCharVar,0,LINESIZE);
+        //memset(tempCharVar,0,LINESIZE);
         n=strlen(CharVars[strchr-'a']); 
 		val=n-val;
-		int cnt=0;
+		//int cnt=0;
         while (val < n) {
-            tempCharVar[cnt++] = CharVars[strchr-'a'][val++];
+			strncat(tempCharVar,&CharVars[strchr-'a'][val++],1);
         }
-        return tempCharVar;
+		goto evalstrLoop;
     }
+
+	/* --------------------------------------------- */
 
 	/* MID$(X$,S,C)   X$: string, S:start position, C:count */
 	if (strncmp(temp,"mid$",4)==0) {
-        // mid$(a$,3,2)		starting at pos 3 for 2 chars
+		// ie. mid$(a$,3,2)		starting at pos 3 for 2 chars
 		int startnum,countnum;
 		char tmpnum[LINESIZE];
         line++;     // skip (
-        if (!(*line >= 'a' && *line <= 'a' && *(line+1) == '$')) {
+        if (!(*line >= 'a' && *line <= 'z' && *(line+1) == '$')) {
             printf("Error - expected character variable in mid$()\n");
                 error = -1;
                 return "";
@@ -618,22 +695,27 @@ char *evalstring(char *line) {
             tmpnum[n] = *line;
             n++; line++;
         }
+		line++;		// skip )
 		countnum = eval(tmpnum);
         if (startnum < 0 || countnum == 0) return "";
         // get start pos, count number of chars of x$
 		if (startnum > strlen(CharVars[strchr-'a'])) return "";
 		if (startnum+countnum > strlen(CharVars[strchr-'a'])) return "";
-        memset(tempCharVar,0,LINESIZE); n=0;
+        //memset(tempCharVar,0,LINESIZE); n=0;
 		for (int x=startnum; x<(startnum+countnum); x++) 
-				tempCharVar[n++] = CharVars[strchr-'a'][x];
-        return tempCharVar;
+				strncat(tempCharVar,&CharVars[strchr-'a'][x],1);
+        goto evalstrLoop;	
     }
+
+	/* ------------------------------------------- */
+
 
 	/* chr$() return char based on value: v$=chr$(65) */
 	if (strncmp(temp,"chr$",4)==0) {
 		line++;		// skip (
+		
 		// test if variable a-z
-		if (*line >= 'a' && *line <= 'z' && *(line+1) == ')') {		// numeric var
+		if (*line >= 'a' && *line <= 'z') {		// numeric var
 			int subscript = 0;
 			char charvar = *line;
 			line++;
@@ -649,27 +731,30 @@ char *evalstring(char *line) {
 				subscript = eval(SUBNUM);
 				line++;
 			}
-			memset(tempCharVar,0,LINESIZE);
-			tempCharVar[0] = (char)NumVar[charvar-'a'][subscript];
-			return tempCharVar;
+			line++; 	// skip )
+			char ch = (char)NumVar[charvar-'a'][subscript];
+			strncat(tempCharVar,&ch,1);
+			goto evalstrLoop;
 		}
+		
 		// test if number
 		char tmpnum[LINESIZE];
 		memset(tmpnum,0,LINESIZE);
-		memset(tempCharVar,0,LINESIZE);
 		n=0; 
 		while (1) {
 			if (!isdigit(*line)) break;
 			tmpnum[n] = *line;
 			n++; line++;
 		}
-		n = eval(tmpnum);
-		tempCharVar[0] = eval(tmpnum);
-		return tempCharVar;
+		line++;		// skip )
+		n = eval(tmpnum); char ch=n;
+		strncat(tempCharVar,&ch,1);
+		goto evalstrLoop;
 	}
 
+	/* --------------------------------------------- */
 
-	printf("Unknown character function\n");
+	printf("Error - Unknown character function in string eval()\n");
 	error = -1;
 	return "";
 }

@@ -283,6 +283,15 @@ will NOT work. Instead use:
 30 print n*n
 40 next n
 
+Do not use spaces in an equasion:
+
+Example that will fail due to spaces in an equasion:
+10 for n=(-1 * pi(0)) to (2*pi(0)) step pi(0)/30
+
+Do this instead:
+10 for n=(-1*pi(0)) to (2*pi(0)) step pi(0)/30
+
+
 NOTE: for/next loops CANNOT be nested. This may change
 in future releases of dbasic.
 
@@ -327,6 +336,7 @@ Not Legal:
 
 Keep the test characters together if more than 1:
 <=, >=, !=, <>
+
 The keywords if/then must have a surrounding space.
 (Actually all keywords need a surrounding space).
 
@@ -832,6 +842,69 @@ x is a positive integer > 0.
 40 print spc(d);"*"
 50 next n
 60 goto 10
+
+
+--- VAL() ---
+
+The val function converts the expression between () to a 
+numeric result. Examples:
+
+10 let v = val(2+3*8)
+20 print v
+30 let a$="2+3*8"
+40 let v = val(a$)
+50 print v
+60 let v=val("2+3*8")
+70 print v
+99 end
+Ready.
+run
+26
+26
+26
+Ready.
+
+The expression between () can be a string surrounded by
+double quotes (line 60), a string variable (line 40) or
+a plain expression (line 10).
+
+This is useful when an expression can be entered with an
+input statement:
+
+10 input "Enter Variable A: ";a
+20 input "Enter Variable B: ";b
+30 input "Enter Formula: ";f$
+40 let v=val(f$)
+50 print "Formula: ";f$
+60 print "Result=";v
+99 end
+Ready.
+run
+Enter Variable A: ?10
+Enter Variable B: ?20
+Enter Formula: ?a*b/100
+Formula: a*b/100
+Result=2
+Ready.
+
+Here the user entered a formula of: a*b/100
+and the val() function put the values of a and b
+into the entered formula to get an answer.
+
+You will get an error if the formula contains an '='
+sign, '>' or '<', or any non-formulaic values.
+
+You can, however, use existing functions:
+10 input "enter a ";a
+20 input "enter formula ";f$
+30 let v=val(f$)
+40 print v
+99 end
+run
+enter a ?10 
+enter formula ?sin(a)*cos(a)
+0.456473
+Ready.
 
 
 

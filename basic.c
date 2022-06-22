@@ -1,4 +1,8 @@
 /* basic.c - Kurt's version of Dartmuth BASIC
+   see the file Dbasic.txt for usage instructions
+   (C) 2022 K Theis <theis.kurt@gmail.com>
+
+ This is free software under the MIT license.
 
  Statements in this version of BASIC:
  REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
@@ -14,7 +18,7 @@
  Functions: SIN(), COS(), TAN(), EXP(), LN(),
  LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
  CHR$(), FNx, INT(), ABS(), SGN(), ATN(), LEN(),
- RND(), RAD(), DEC(), SPC()
+ RND(), RAD(), DEC(), SPC(), VAL()
 
  Floating point numeric variables are a...z
  a(0)..a(10) ... z(0)..z(10) are pre-defined
@@ -25,12 +29,10 @@
 
  TODO: 
  keywords: FOPEN(), FCLOSE(), FREAD(), FWRITE()
- string functions: VAL()
+ string functions: 
  math functions: 
  misc functions: NOT(), TIME(), TAB()
 
- (C) 2022 Kurt Theis <theis.kurt@gmail.com>
- This is licensed using the MIT license.
 
 	To build this:
 	make
@@ -83,7 +85,7 @@ int NumSize[26];				// used in DIM(). Stops from re-diming downwards.
 
 /* extern functions */
 int parse(char *);
-int run_let(char *);
+//int run_let(char *);
 int run_print(char *);
 int run_input(char *);
 int run_goto(char *);
@@ -102,7 +104,8 @@ void load(char *);
 void save(char *);
 int show2();
 int dim(char *);
-
+// experimental
+int let(char *);
 
 /***** RUN_CLEAR ******/
 /* set all vars to 0 when program starts */
@@ -115,6 +118,7 @@ int run_clear(void) {
 	extern char CharVars[26][LINESIZE];
 	extern int DataPosition;
 	extern int DataStorageMax;
+	extern char tempCharVar[LINESIZE];
 
 	// clear data statements
 	DataPosition=0;
@@ -126,16 +130,21 @@ int run_clear(void) {
 			NumVar[row][col] = 0;
 		}
 	}
+	
 	// set index vars to 0
 	index_start = 0;
 	index_end = 0;
 	index_step = 0;
 	index_var = ' ';
 	forlinenumber = 0;
+	
 	// set char vars to NULL
 	for (int n=0; n<26; n++) memset(CharVars[n],0,LINESIZE);
+	memset(tempCharVar,0,LINESIZE);
+
 	// set functions to null
 	for (int n=0; n<26; n++) memset(fn[n],0,LINESIZE);
+	
 	return 0;
 }
 
@@ -230,7 +239,8 @@ int parse(char *line) {
 	}
 
 	if (strcmp(word,"let")==0) {		// let.c
-		res = run_let(line);
+		//res = run_let(line);
+		res = let(line);
 		if (error == 0) return res;
 		return -1;
 	}
@@ -328,7 +338,7 @@ int parse(char *line) {
 
 	// unknown command
 	printf("SYNTAX ERROR: [%s]\n",line);
-	return 0;
+	return -1;
 }
 
 void ignoreC(int dummy) {

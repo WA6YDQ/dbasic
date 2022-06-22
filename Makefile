@@ -1,9 +1,9 @@
 all:	basic.o print.o input.o goto.o math.o let.o \
 		ifthen.o fornext.o data.o def.o insert.o loadsave.o \
-		dim.o
+		dim.o 
 	$(CC) $(FLAGS) -o dbasic basic.o print.o input.o goto.o \
 		math.o let.o ifthen.o fornext.o data.o def.o \
-		insert.o loadsave.o dim.o  $(LIBS)
+		insert.o loadsave.o dim.o   $(LIBS)
 
 clean:	
 	/bin/rm -f *.o
@@ -13,7 +13,7 @@ install:
 
 LIBS = -lm
 CC = gcc
-FLAGS = -Wall 
+FLAGS = -Wall -g
 
 basic.o	:	basic.c
 	$(CC) $(FLAGS) -c basic.c
@@ -53,3 +53,5 @@ loadsave.o	:	loadsave.c
 
 dim.o	:	dim.c
 	$(CC) $(FLAGS) -c dim.c
+
+

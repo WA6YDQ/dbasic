@@ -1,146 +1,185 @@
-/* LET (var) = (expression) */
+/* let.c 
+ *
+ * part of dbasic 
+ * (C) k theis <theis.kurt@gmail.com> 2022
+ *
+ * parse the let command, assign variables
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#define _ISOC99_SOURCE
-#include <math.h>
 #include "dbasic.h"
 
-int run_let(char *line) {
+int let(char *line) {
+	char charvar = '\0';		// character variable
+	int subscript = 0;			// array substring
+	char tmpstr[80] = {};		// used to extract vals
+	int n=0;
+	int error = 0;
+	float res = 0;
+	extern float *NumVar[26];	// numeric varaibles to use
+	extern char CharVars[][80];	// character variables to use
+	extern int NumSize[26];		// holds subscript size
+	float eval(char *);			// number evaluation function
+	char *evalstring(char *);	// string eval function
 
-	float eval(char *);
-	extern float *NumVar[26];
-	extern char CharVars[][80];
-	extern char *evalstring(char *);
-	extern int NumSize[26];
+	/* examples: 
+	 *
+	 * 10 let a=100, b=sin(30*12), c=a+b*c, a(2)=3, a(n+4)=(n*n) 
+	 * 10 let a$="abc", b$=left$(a$,1), c$=a$+"abc"
+	 *
+	 */
 
-	// debugging
-	// printf("let:line=[%s]\n",line);
+	/* skip spaces, line number, let statement */
+	if (isdigit(*line)) while (isdigit(*line)) line++;
+	if (isblank(*line)) while (isblank(*line)) line++;
+	while (!(isblank(*line))) line++;
 
-	while (isdigit(*line)) line++;  	// skip line number
-	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
-	while (isalpha(*line)) line++;	// skip LET keyword
+letloop:
+	/* pointing at a blank char (space/tab), variable: - get variable */
+	if (isblank(*line)) while (isblank(*line)) line++;
 
-	/* format: 100 LET a=5, b=a*10+3, a$="this is a test"\n\0 */
 
-	while (1) {
-		if (*line == '\0' || *line == '\n') return 0;		// EOL
-		if (*line == ',') {					// comma seperator
-			line++;
-			continue;
+	/* assign variable */
+	if (*line >= 'a' && *line <= 'z') {
+		charvar = *line; line++;
+	} else {
+		printf("Error - bad variable name [%c] in LET\n",*line);
+		return -1;
+	}
+
+
+
+
+	/* ****** Character Variable ****** */
+
+	if (*line == '$') {			/* variable is a string */
+		line++;					// skip $
+		if (isblank(*line)) while (isblank(*line)) line++;
+		if (*line != '=') {
+			printf("Error - missing '=' in LET statement\n");
+			return -1;
 		}
+		line++;			// skip =
+		if (isblank(*line)) while (isblank(*line)) line++;
+		
+		/* assume everything else is an expression */
+		/* if a comma is inside () then ignore it. Else it's a seperator */
+		memset(tmpstr,0,sizeof(tmpstr)); n=0; int pc=0;	// parens count
+		while (1) {
+			if (*line == '\0' || *line == '\n') break;
+			if (*line == ',' && pc==0) break;			// comma outside ()
+			if (*line == '(') pc++;
+			if (*line == ')') pc--;
+			tmpstr[n] = *line;
+			line++; n++;
+		}
+		if (pc > 0) {
+			printf("Error - mismatched parenthesis in LET\n");
+			return -1;
+		}
+		error = 0;
+		strcpy(CharVars[charvar-'a'],evalstring(tmpstr));
+		if (error == -1) {
+			printf("Error - bad string expression in LET statement\n");
+			return -1;
+		}
+		// *line points to EOL or ','
+		if (*line == '\0' || *line == '\n') return 0;
+		if (*line == ',') {
+			line++;
+			goto letloop;
+		}
+
+		printf("Error - unknown character [%c] in LET statement\n",*line);
+		return -1;
+	}
+
+
+
+
+
+	
+	
+	
+	/* ***** Numeric Variable ****** */
+
+	subscript = 0;				/* default subsript for array - see if different */
+	if (*line == '(') {			/* variable is a numeric array */
+		line++;		// skip (
+		memset(tmpstr,0,sizeof(tmpstr));
+		n=0;
+		while (*line != ')') {
+			tmpstr[n] = *line;
+			line++; n++;
+		}
+		line++;			// skip )
+		error = 0;
+		res = eval(tmpstr);
+		if (error == -1) {
+			printf("Error - subscript evaluation failed in LET statement\n");
+			return -1;
+		}
+		subscript = (int)res;
+		/* bounds testing */
+		if (subscript > NumSize[charvar-'a'] || subscript < 0) {
+			printf("Error - bad subscript [%d] in LET statement\n",subscript);
+			return -1;
+		}
+	}
+
+	/* if space, skip */
+	if (isblank(*line)) while (isblank(*line)) line++;
+
+	/* check for '=' */
+	if (*line != '=') {
+		printf("let: *expr [%c]\n",*line); 
+		printf("Error - missing '=' in LET statement\n");
+		return -1;
+	}
+	line++;		// skip =
+	
+	/* if space, skip */
+	if (isblank(*line)) while (isblank(*line)) line++;
+
+	/* get the expression, assign to the variable */
+	memset(tmpstr,0,sizeof(tmpstr));
+	n=0;
+	while (1) {
 		if (isblank(*line)) {
 			line++;
 			continue;
 		}
-
-		/* test strings: format LET a$="test", b$=a$ */
-		if (*line >= 'a' && *line <= 'z' && *(line+1)== '$') {
-			char strvar = *line; line+=2;		// skip past $
-			if (isblank(*line)) while (isblank(*line)) line++;
-			if (*line != '=') {
-				printf("missing = in LET\n");
-				return -1;
-			}
-			line++;			// skip =
-			if (isblank(*line)) while (isblank(*line)) line++;
-	
-			/* tests on right hand values */
-
-			/* see if =a$  */
-			if (*line >='a' && *line <='z' && *(line+1)=='$') {
-				strcpy(CharVars[strvar-'a'],CharVars[*line-'a']);
-				line += 2;	// skip var
-				continue;
-			}
-		
-			/* everything between double quotes */
-			if (*line == '"') {
-				line++;		// skip "
-				int n=0;
-				while (*line != '"') {
-					if (*line == '\0' || *line == '\n') {
-						printf("Error - missing close quote in LET\n");
-						return -1;
-					}
-					CharVars[strvar-'a'][n] = *line;
-					n++; line++;
-				}
-				line++;	// skip final "
-				continue;
-			}
-
-			/* test string functions: left$, mid$, right$, etc */
-			char temp[LINESIZE]={}; int n=0;
-			while (1) {
-				if (*line == '\0' ) break;
-				if (*line == ',' && *(line+1) == ' ') break;	// seperator btwn assignments
-				temp[n] = *line;
-				n++; line++;
-				if (n > LINESIZE) {
-					printf("Error - line too long\n");
-					return -1;
-				}
-			}
-			strcpy(CharVars[strvar-'a'],evalstring(temp));
-			continue;
-
-		}
-
-		/* test numeric variable */
-		if (*line >= 'a' && *line <= 'z' && *(line+1) != '$') {
-			int subscript = 0;
-			char charvar = *line;		// get variable name
-			line++;
-			if (*line == '(') {		// subscripts
-				line++;			// point past (
-				char SUBNUM[LINESIZE]={};	// string for subscript
-				int n=0;
-				while (1) {			// get subscript
-					if (*line == ')') break;
-					SUBNUM[n] = *line;
-					line++; n++;
-				}
-				subscript = eval(SUBNUM); 
-				line++;			// point past )
-			}
-			// bounds checking
-			if (subscript < 0 || subscript > NumSize[charvar-'a']) {
-				printf("Error - bounds error in subscript: %c(%d)\n",charvar,subscript);
-				return -1;
-			}
-			char expr[LINESIZE]; memset(expr,0,LINESIZE); int n=0;
-			if (isblank(*line)) while (isblank(*line)) line++;
-			if (*line != '=') {
-				printf("Syntax Error in LET\n");
-				return -1;
-			}
-			line++;		// got '='  skip it
-			while (1) {
-				if (*line == ',' || *line == '\0' || *line == '\n') break;
-				if (isblank(*line)) while (isblank(*line)) line++;
-				expr[n] = *line;
-				n++; line++;
-				if (n>=LINESIZE) {
-					printf("Error - expression too long\n");
-					return -1;
-				}
-			}
-			float res = eval(expr);
-			NumVar[charvar-'a'][subscript] = res;
-			continue;
-		} 
-
-		
-		/* unknown char */
-		printf("unknown character in LET statement [%c]\n",*line);
-		line++;
+		if (*line == ',') break;
+		if (*line == '\0' || *line == '\n') break;
+		tmpstr[n] = *line;
+		line++; n++;
+	}
+	/* tmpstr holds expression */
+	error = 0;
+	res = eval(tmpstr);
+	if (error == -1) {
+		printf("Error - bad expression [%s] in LET statement\n",tmpstr);
 		return -1;
 	}
+	NumVar[charvar-'a'][subscript] = res;
 
-	printf("Error - unknown error in LET\n");
+	/* test for EOF */
+	if (*line == '\0' || *line == '\n') return 0;
+
+	/* test for ',' - more assignments on the line */
+	if (*line == ',') {
+		line++;
+		goto letloop;
+	}
+
+	printf("Error - unknown character [%c] in LET statement\n",*line);
 	return -1;
 }
 
+
+
+	
