@@ -1,6 +1,6 @@
 This is the readme for dbasic - an implimentation of Dartmouth BASIC.
 This is licensed under the MIT license. This compiles cleanly
-and makes valgrind happy.
+and runs error free in valgrind.
 
 To build, type 'make'
 To install, type sudo make install
@@ -78,6 +78,8 @@ Here the keyword LET (as ALL keywords) must have surrounding spaces.
 15 let g=a*e-b*d
 Spaces between elements are also OK:
 30 let g = a  * e  - b  *  d
+
+(By the way, LET is optional)
 
 Dartmouth BASIC has a...z and a0, a1, c3, d2, etc as numeric
 variables. Here we only have a...z with no second numeric

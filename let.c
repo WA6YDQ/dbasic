@@ -16,7 +16,7 @@
 int let(char *line) {
 	char charvar = '\0';		// character variable
 	int subscript = 0;			// array substring
-	char tmpstr[80] = {};		// used to extract vals
+	char tmpstr[80] = {'\0'};		// used to extract vals
 	int n=0;
 	int error = 0;
 	float res = 0;

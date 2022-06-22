@@ -71,9 +71,9 @@ int forlinenumber = 0;			// FOR/NEXT line number to return to
 float *DataStorage;				// DATA statement storage, will assign later
 int DataStorageMax=0;			// max number of data elements
 int DataPosition=0;				// position of read data objects
-char fn[26][80]={};				// function definitions
+char fn[26][LINESIZE]={'\0'};				// function definitions
 int error = 0;					// used by eval(), 0 is OK, -1 is expression error
-char tempCharVar[LINESIZE];		// used in evalstring()
+char tempCharVar[MAXLINESIZE];		// used in evalstring()
 int RUNSTOP=0;					// ctrl-C handler
 
 
@@ -111,14 +111,14 @@ int let(char *);
 /* set all vars to 0 when program starts */
 int run_clear(void) {
 	extern float *NumVar[26];
-	extern char fn[26][80];
+	extern char fn[26][LINESIZE];
 	extern float index_start, index_end, index_step;
 	extern char index_var;
 	extern int forlinenumber;
 	extern char CharVars[26][LINESIZE];
 	extern int DataPosition;
 	extern int DataStorageMax;
-	extern char tempCharVar[LINESIZE];
+	extern char tempCharVar[MAXLINESIZE];
 
 	// clear data statements
 	DataPosition=0;
@@ -140,7 +140,7 @@ int run_clear(void) {
 	
 	// set char vars to NULL
 	for (int n=0; n<26; n++) memset(CharVars[n],0,LINESIZE);
-	memset(tempCharVar,0,LINESIZE);
+	memset(tempCharVar,0,MAXLINESIZE);
 
 	// set functions to null
 	for (int n=0; n<26; n++) memset(fn[n],0,LINESIZE);
@@ -159,7 +159,7 @@ int getstartaddress(int linenum) {
 
 */
 	char testline[LINESIZE];
-	char numstr[6] = {};
+	char numstr[LNSIZE] = {'\0'};
 	int n=0, addr=0; 
 gsrloop:
 	n=0;
@@ -185,13 +185,13 @@ int getNextLineNumber() {
 	/* This only works when called from the parse loop */
     int i=lineptr, x=0;             // skip current line
     while (buffer[i++] != '\n');
-    char tmpline[LINESIZE]={};      // next line
+    char tmpline[LINESIZE]={'\0'};      // next line
     while (1) {
     	tmpline[x] = buffer[i+x];   // fill temp line
         if (tmpline[x]=='\n') break;
             x++;
     }
-    char linen[6];
+    char linen[LNSIZE];
     sscanf(tmpline,"%s",linen);     // get line number of next line
     return atoi(linen);
 }
@@ -207,7 +207,7 @@ int getNextLineNumber() {
 
 int parse(char *line) {
 	int res = 0;
-	char linenum[6],word[40], word2[40],word3[40];
+	char linenum[LNSIZE],word[LINESIZE], word2[LINESIZE],word3[LINESIZE];
 	sscanf(line,"%s %s",linenum,word);	// get line number and 1st command
 
 	if (strcmp(word,"rem")==0) {		// ignore this line
@@ -306,7 +306,7 @@ int parse(char *line) {
 		// get & save the line # of the next line
 		int i=lineptr, x=0;
 		while (buffer[i++] != '\n');
-		char tmpline[LINESIZE]={};
+		char tmpline[LINESIZE]={'\0'};
 		while (1) {
 			tmpline[x] = buffer[i+x];
 			if (tmpline[x]=='\n') break;
@@ -336,13 +336,36 @@ int parse(char *line) {
 		
 	}
 
+	/* maybe a variable assignment w/o LET? */
+	if (word[0] >= 'a' && word[0] <= 'z' && (word[1]=='(' || word[1]=='$' || word[1]=='\0' || word[1]=='=')) {
+		/* re-write line to conform to LET statement */
+		char TEMP[LINESIZE] = {'\0'}; int n=0;
+		if (isdigit(*line)) while (isdigit(*line)) TEMP[n++] = *line++;
+		if (isblank(*line)) while (isblank(*line)) TEMP[n++] = *line++;
+		/* now add LET */
+		TEMP[n++]='l'; TEMP[n++]='e'; TEMP[n++]='t'; TEMP[n++]=' ';
+		/* and finish the line */
+		while (*line != '\0') {
+			TEMP[n++] = *line++;
+			if (n>=LINESIZE) {
+				printf("Error - runaway line in parse:assignment\n");
+				return -1;
+			}
+		}
+		/* and send the line to the LET statement */
+		res = let(TEMP);
+		if (error == 0) return res;
+		return -1;
+	}
+
+
 	// unknown command
 	printf("SYNTAX ERROR: [%s]\n",line);
 	return -1;
 }
 
-void ignoreC(int dummy) {
-	usleep(10000);
+void ignoreC(int dummy) {	// catch ctrl-c, delay for keyboard debounce
+	usleep(10000);			// set flag used in runloop
 	if (!RUNSTOP) return;
 	RUNSTOP = 0;
 	return;
@@ -357,7 +380,7 @@ int main(int argc, char **argv) {
 
 	int n=0;				// local var
 	char line[LINESIZE];
-	char filename[LINESIZE]={};
+	char filename[LINESIZE]={'\0'};
 	int LOADFLAG = 0;
 	int res = 0;
 	RUNSTOP = 0;
@@ -371,7 +394,7 @@ int main(int argc, char **argv) {
 	
 	/* set up the return stack (gosub's) */
 	/* this is repeated in the parse loop */
-	for (int n=0; n<20; n++) returnlinenumber[n] = 0;
+	for (int n=0; n<GOSUBSTACKSIZE; n++) returnlinenumber[n] = 0;
 	returnPos = 0;
 
 	/* set up memory for the basic statements */
@@ -531,7 +554,7 @@ runit:
 	}
 
 	/* set up the return stack (gosub's) */
-    for (int n=0; n<20; n++) returnlinenumber[n] = 0;
+    for (int n=0; n<GOSUBSTACKSIZE; n++) returnlinenumber[n] = 0;
     returnPos = 0;
 
 

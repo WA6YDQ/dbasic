@@ -12,8 +12,8 @@ int gethighestlinenumber() {
 	extern char *buffer;
 	extern int pos;
 	int n=0, tmppos=0, linenumber = 0;
-	char linenum[6] = {};
-	char line[LINESIZE] = {}; memset(line,0,LINESIZE);
+	char linenum[LNSIZE] = {'\0'};
+	char line[LINESIZE] = {'\0'}; memset(line,0,LINESIZE);
 	// read a line, get line number
 ghln:
 	n = 0; 
@@ -39,7 +39,7 @@ int getaddressbeforelinenumber(int lnr) {
 	extern int pos;
 
 	int n=0, tmppos=0, linenumber=0;
-	char linenum[6];
+	char linenum[LNSIZE];
 	char line[LINESIZE]; memset(line,0,LINESIZE);
 	// read a line, get line number and address. 
 	// As soon as the line number is greater than 
@@ -100,7 +100,7 @@ int insert(char line[LINESIZE]) {
 	}
 
 	// test if line has a line number
-	char linenum[8], keyword[12];
+	char linenum[LNSIZE], keyword[LINESIZE];
 	sscanf(line,"%s %s",linenum, keyword);
 	if (atoi(linenum) < 1) {
 		printf("Error - missing line number\nReady.\n");

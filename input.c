@@ -71,7 +71,7 @@ int run_input(char *line) {
 			line++;
 			if (*line == '(') {	// using subscripts
 				line++;
-				char SUBNUM[LINESIZE]={};
+				char SUBNUM[LINESIZE]={'\0'};
 				int n=0;
 				while (1) {
 					if (*line == ')') break;

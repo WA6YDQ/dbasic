@@ -21,7 +21,7 @@ int run_ifthen(char *line) {
 	float eval(char *);
 	float lvalue=0, rvalue=0, linenum=0;
 	int n=0;
-	char expr[LINESIZE] = {};					// expression for eval()
+	char expr[LINESIZE] = {'\0'};					// expression for eval()
 	int isoperand(char);
 
 	// debug

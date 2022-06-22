@@ -1,8 +1,8 @@
-all:	basic.o print.o input.o goto.o math.o let.o \
+all:	basic.o print.o input.o goto.o eval.o let.o \
 		ifthen.o fornext.o data.o def.o insert.o loadsave.o \
 		dim.o 
 	$(CC) $(FLAGS) -o dbasic basic.o print.o input.o goto.o \
-		math.o let.o ifthen.o fornext.o data.o def.o \
+		eval.o let.o ifthen.o fornext.o data.o def.o \
 		insert.o loadsave.o dim.o   $(LIBS)
 
 clean:	
@@ -13,7 +13,7 @@ install:
 
 LIBS = -lm
 CC = gcc
-FLAGS = -Wall -g
+FLAGS = -Wall -pedantic
 
 basic.o	:	basic.c
 	$(CC) $(FLAGS) -c basic.c
@@ -27,8 +27,8 @@ input.o	:	input.c
 goto.o	:	goto.c
 	$(CC) $(FLAGS) -c goto.c
 
-math.o	:	math.c
-	$(CC) $(FLAGS) -c math.c
+eval.o	:	eval.c
+	$(CC) $(FLAGS) -c eval.c
 
 let.o	:	let.c
 	$(CC) $(FLAGS) -c let.c

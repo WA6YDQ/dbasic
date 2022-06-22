@@ -262,12 +262,14 @@ Use the let keyword to assign variables:
 30 let a=rnd(), b=sqr(2)+456*(123+456)
 31 print a,b
 
+NOTE: The LET keyword is optional.
 
-NOTE: The LET keyword is NOT optional as in some BASIC's.
-The line:
-10 a=100
-will NOT work. Instead use:
-10 let a=100
+10 a=6,b=sqr(a),b$="this is a "+"string"
+20 print a,b,b$
+99 end
+run
+6   2.44949   this is a string
+Ready.
 
 
 

@@ -3,10 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "dbasic.h"
 
 /* GOTO */
 int run_goto(char *line) {		// get line number, return it
-	char ln[6], word[6], linenum[40];
+	char ln[LNSIZE], word[6], linenum[LNSIZE];
 	float eval(char *);
 
 	sscanf(line,"%s %s %s",ln,word,linenum);
@@ -26,7 +27,7 @@ int run_ongoto(char *line) {	// return line number based on variable
 
 	//char *opers; 
 	char *tmp;
-	char temp[30][20];			// max 30 line numbers
+	char temp[30][LNSIZE];			// max 30 line numbers
 	int n=0, res=0;
 	float eval(char *);
 	
@@ -35,6 +36,10 @@ int run_ongoto(char *line) {	// return line number based on variable
 	while ((tmp = strtok(NULL," "))!=NULL) {		// break on NULL
 		if (tmp != NULL) strcpy(temp[n],tmp);
 		n++;
+		if (n > 30) {
+			printf("Error - max of 30 addresses allowed\n");
+			return -1;
+		}
 	}
 	// element 0 is 'on'
 	

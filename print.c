@@ -14,7 +14,7 @@ int run_print(char *line) {
 	float eval(char *);
 	extern char CharVars[][80];
 	extern char *evalstring(char *);
-	//extern char tempCharVar[LINESIZE];
+	//extern char tempCharVar[MAXLINESIZE];
 	//extern float *NumVar[26];
 	extern int error;
 	error = 0;

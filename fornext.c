@@ -11,7 +11,7 @@ int run_for(char *line) {
 	extern float index_end;
 	extern float index_step;
 	extern float *NumVar[26];
-	char expr[40] = {};
+	char expr[40] = {'\0'};
 	int n=0;
 	float eval(char *);
 

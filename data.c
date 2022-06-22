@@ -23,10 +23,10 @@ int scanData(char *buffer, int lastpos) {
 
 	int position=0;		// current position in the buffer;
 	int n=0;
-	char ln[6]={} ,keyword[12]={},line[80]={};
+	char ln[6]={'\0'} ,keyword[12]={'\0'},line[80]={'\0'};
 	int x=0;;
 	char *testline;
-	char numstr[12]={};
+	char numstr[12]={'\0'};
 
 bufscan:
 	/* scan the buffer */
@@ -154,7 +154,7 @@ int run_read(char *line) {		// load variables with data values
 			line++;
 			if (*line == '(') {		// using subscripts
 				line++;
-				char SUBNUM[LINESIZE]={};
+				char SUBNUM[LINESIZE]={'\0'};
 				int n=0;
 				while (1) {
 					if (*line == ')') break;
