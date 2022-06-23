@@ -1,9 +1,9 @@
 all:	basic.o print.o input.o goto.o eval.o let.o \
 		ifthen.o fornext.o data.o def.o insert.o loadsave.o \
-		dim.o 
+		dim.o file.o
 	$(CC) $(FLAGS) -o dbasic basic.o print.o input.o goto.o \
 		eval.o let.o ifthen.o fornext.o data.o def.o \
-		insert.o loadsave.o dim.o   $(LIBS)
+		insert.o loadsave.o dim.o file.o   $(LIBS)
 
 clean:	
 	/bin/rm -f *.o
@@ -54,4 +54,5 @@ loadsave.o	:	loadsave.c
 dim.o	:	dim.c
 	$(CC) $(FLAGS) -c dim.c
 
-
+file.o	:	file.c
+	$(CC) $(FLAGS) -c file.c

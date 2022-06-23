@@ -12,6 +12,11 @@ int run_input(char *line) {
 	char getline[LINESIZE];
 	float eval(char *);
 	extern int NumSize[26];
+	extern FILE *fd[8];
+	extern int fdnumber;
+	int ISFILE=0;			// flag for file operations
+
+
 
 	// debug 
 	// printf("INPUT: %s\n",line);
@@ -19,16 +24,37 @@ int run_input(char *line) {
 	while (isdigit(*line)) line++;		// skip line number
 	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 	while (isalpha(*line)) line++;		// skip keyword
-	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 
-	/* format: 	input a
-	 * 			input a,b,c
-	 * 			input "enter a",a
+	// test for file#
+    if (isblank(*line)) while (isblank(*line)) line++;
+    if (*line == '#') {     // print to a file 
+        ISFILE=1;
+        line++;             // skip past #
+        if (!(isdigit(*line))) {
+            printf("Error - bad syntax in INPUT\n");
+            return -1;
+        }
+		fdnumber = atoi(line);
+        if (fdnumber < 1 || fdnumber > 7) {     // 1-7 allowed
+            printf("Error - bad file number %d in INPUT\n",fdnumber);
+            return -1;
+        }
+        /* make sure it's already opened */
+        if (fd[fdnumber] == NULL) {
+            printf("Error - file number %d is not opened\n",fdnumber);
+            return -1;
+        }
+        line++;         // skip file number
+    }
+
+	/* format: 	input a					input #n a
+	 * 			input a,b,c				input #n a,b,c
+	 * 			input "enter a",a		input #n "enter a",a
+	 * 			input a$				input #n a$
 	 */
 
 	while (1) {		// loop and test until EOL
 
-		//if (*line == '\n' || *line == '\0') break;	// EOL
 		if (*line == '\0') break;	// EOL
 		if (*line == ',' || *line == ';' || *line == ' ') {			// ignore ,;[ ]
 			line++;
@@ -44,7 +70,8 @@ int run_input(char *line) {
 					return -1;
 				}
 				if (*line == '"') break;
-				printf("%c",*line++);
+				if (!ISFILE) 					// don't show during file ops
+					printf("%c",*line++);
 			}
 			line++;				// skip ending "
 			continue;
@@ -54,8 +81,9 @@ int run_input(char *line) {
 		if (*line >= 'a' && *line <= 'z' && *(line+1) == '$') {
 			char strvar = *line;		// get variable
 			memset(CharVars[strvar-'a'],0,sizeof(CharVars[strvar-'a']));
-			printf("?");
-			fgets(getline,LINESIZE,stdin);
+			if (!ISFILE) printf("?");
+			if (!ISFILE) fgets(getline,LINESIZE,stdin);
+			if (ISFILE) fgets(getline,LINESIZE,fd[fdnumber]);
 			getline[strlen(getline)-1] = '\0';		// strip off \n
 			strcpy(CharVars[strvar-'a'],getline);
 			line += 2;
@@ -87,8 +115,9 @@ int run_input(char *line) {
                 return -1;
             }
 
-			printf("?");
-			fgets(getline,20,stdin);		// 20 chars max for digits
+			if (!ISFILE) printf("?");
+			if (!ISFILE) fgets(getline,LNSIZE,stdin);		// 20 chars max for digits
+			if (ISFILE) fgets(getline,LNSIZE,fd[fdnumber]);
 			NumVar[charvar-'a'][subscript] = eval(getline);		// save value
 			line++;
 			continue;

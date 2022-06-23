@@ -7,7 +7,8 @@
  Statements in this version of BASIC:
  REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
  IF/THEN, FOR/NEXT/STEP, INPUT, READ, DATA,
- RESTORE, ON/GOTO, ON/GOSUB, CLEAR, STOP, DEF
+ RESTORE, ON/GOTO, ON/GOSUB, CLEAR, STOP, DEF,
+ OPEN, CLOSE, REWIND
 
  Formulas: a+b, a-b, a*b, a/b, a**b, -a
  
@@ -28,7 +29,7 @@
  Case is preserved when between double quotes ""
 
  TODO: 
- keywords: FOPEN(), FCLOSE(), FREAD(), FWRITE()
+ keywords:
  string functions: 
  math functions: 
  misc functions: NOT(), TIME(), TAB()
@@ -76,6 +77,9 @@ int error = 0;					// used by eval(), 0 is OK, -1 is expression error
 char tempCharVar[MAXLINESIZE];		// used in evalstring()
 int RUNSTOP=0;					// ctrl-C handler
 
+// these are file descripters
+FILE *fd[8];
+int fdnumber=0;
 
 // these reference numeric variables
 int GARBAGE = 0;				// numeric variable garbage collection
@@ -106,6 +110,10 @@ int show2();
 int dim(char *);
 // experimental
 int let(char *);
+int fileopen(char *);
+int fileclose(char *);
+int filerewind(char *);
+
 
 /***** RUN_CLEAR ******/
 /* set all vars to 0 when program starts */
@@ -237,9 +245,23 @@ int parse(char *line) {
 		res = def(line);
 		return res;
 	}
+	
+	if (strcmp(word,"open")==0) {		// file.c
+		res = fileopen(line);
+		return res;
+	}
+
+	if (strcmp(word,"close")==0) {		// file.c
+		res = fileclose(line);
+		return res;
+	}
+
+	if (strcmp(word,"rewind")==0) {		// file.c
+		res = filerewind(line);
+		return res;
+	}
 
 	if (strcmp(word,"let")==0) {		// let.c
-		//res = run_let(line);
 		res = let(line);
 		if (error == 0) return res;
 		return -1;
@@ -391,7 +413,10 @@ int main(int argc, char **argv) {
 
 	/* seed the random number functions */
 	srandom(time(NULL));	// will be the same if multiple runs in the same second
-	
+		
+	/* set up file descriptors */
+	for (int n=0; n<8; n++) fd[n]=NULL;
+
 	/* set up the return stack (gosub's) */
 	/* this is repeated in the parse loop */
 	for (int n=0; n<GOSUBSTACKSIZE; n++) returnlinenumber[n] = 0;
@@ -579,6 +604,13 @@ parseLoop:
 		printf("Error - bad line number %s\n",ln);
 		free(buffer); free(DataStorage);
 		for (int n=0; n<26;n++) free(NumBase[n]);
+		/* close all open file descriptors */
+        for (int n=1; n<8; n++) {
+            if (fd[n] != NULL) {
+                fclose(fd[n]);
+                fd[n] = NULL;
+            }
+        }
 		exit(0);
 	}
 
@@ -587,6 +619,13 @@ parseLoop:
 
 	/* test for eval() errors */
 	if (error == -1) {
+		/* close all open file descriptors */
+        for (int n=1; n<8; n++) {
+            if (fd[n] != NULL) {
+                fclose(fd[n]);
+                fd[n] = NULL;
+            }
+        }
 		printf("Error - expression error in %d [%s]\n",currentlinenumber,line);
 		LOADFLAG=0;
 		printf("Ready.\n");
@@ -595,6 +634,13 @@ parseLoop:
 
 	/* test return code */
 	if (res == -998) {				// STOP statement
+		/* close all open file descriptors */
+        for (int n=1; n<8; n++) {
+            if (fd[n] != NULL) {
+                fclose(fd[n]);
+                fd[n] = NULL;
+            }
+        }
 		printf("STOPPED in line %d\n",currentlinenumber);
 		if (LOADFLAG==0) {
 			printf("Ready.\n");
@@ -610,6 +656,13 @@ parseLoop:
 	}
 
 	if (res == -999) {				// END Statement
+		/* close all open file descriptors */
+		for (int n=1; n<8; n++) {
+			if (fd[n] != NULL) {
+				fclose(fd[n]);
+				fd[n] = NULL;
+			}
+		}
 		if (LOADFLAG==0) {
 			printf("Ready.\n");
 			goto runloop;
@@ -624,6 +677,13 @@ parseLoop:
 	}
 	
 	if (res == -1) {				// parse returned an error
+		/* close all open file descriptors */
+        for (int n=1; n<8; n++) {
+            if (fd[n] != NULL) {
+                fclose(fd[n]);
+                fd[n] = NULL;
+            }
+        }
 		printf("Error in line %d\n",currentlinenumber);
 		if (LOADFLAG==0) {
 			printf("Ready.\n");
@@ -670,6 +730,14 @@ parseLoop:
 		goto parseLoop;				// continue with basic program
 	
 	// user hit ctrl-c
+	/* close all open file descriptors */
+    for (int n=1; n<8; n++) {
+       if (fd[n] != NULL) {
+            fclose(fd[n]);
+            fd[n] = NULL;
+        }
+    }
+	
 	printf("\nBreak in %d\nReady.\n",currentlinenumber);
 	goto runloop;
 	
@@ -677,6 +745,13 @@ parseLoop:
 	printf("Unknown error in line %d.\n",currentlinenumber);
 
 	/* done */
+	/* close all open file descriptors */
+    for (int n=1; n<8; n++) {
+        if (fd[n] != NULL) {
+           fclose(fd[n]);
+           fd[n] = NULL;
+        }
+    }
 	free(buffer);
 	free(DataStorage);
 	if (GARBAGE) {

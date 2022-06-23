@@ -234,6 +234,25 @@ between ().
 See the SPC() function below for more examples.
 
 
+--- File Operations ---
+
+If a # and a file number occurs just after the PRINT 
+statement, all output will be directed to an open file.
+
+10 print #1 a$,n
+20 print #5 "This is a test: ";n
+
+The '#' is required. An error will occur is the file number 
+has not already been opened. See the OPEN command below.
+
+NOTE: When the file is opened, if the file already exists,
+reading will start from the BEGINNING of the file. ALL writing
+will be APPENDED to the END of the file. Use the 
+operating system commands to delete the contents of an existing
+file if needed.
+
+This is to prevent you from destroying a data file by mistake.
+
 --- INPUT ---
 
 Get user input:
@@ -250,6 +269,14 @@ Get user input:
 Both commas ',' and semi-colons ';' act just as in
 the PRINT statement above.
 
+--- File Operations ---
+
+If a # and a file number occurs just after the INPUT 
+statement, all input will be read from an open file.
+
+10 input #1 n
+ 
+See FILE OPERATIONS below for examples.
 
 
 --- LET ---
@@ -563,7 +590,146 @@ run
 Ready.
 
 
- 
+--- FILE OPERATIONS ---
+
+dbasic supports reading from and writing to files.
+The keywords OPEN, CLOSE, REWIND, PRINT # and INPUT #
+are used to manipulate files.
+
+
+--- OPEN ---
+
+Use the keyword 'open' to open a file for reading/writing.
+
+If a file already exists when opened, it will be opened
+in the read+append mode. 
+
+If the file does not already exist, it will be created in
+write+read mode.
+
+The format to open a file:
+
+open [filename] as #[file number]
+
+where filename is a path name (includes directorys name
+is needed) and file numbers are 1-7 inclusive.
+
+The keyword 'as' is required. The '#' preceeding the 
+file number is also required.
+
+10 open test.txt as #1
+
+If the filenumber is already used (a file with the filenumber
+is currently opened) an error will be reported.
+
+If the file cannot be opened (insufficent space, no permissions
+to access the file, etc) an error will be reported.
+
+NOTE: When the file is opened, if the file already exists,
+reading will start from the BEGINNING of the file. ALL writing
+will be APPENDED to the END of the file. Use the 
+operating system commands to delete the contents of an existing
+file if needed.
+
+This is to prevent you from destroying a data file by mistake.
+
+--- CLOSE ---
+
+Use the keyword 'close' to close an existing file.
+Note that files are automatically closed on errors, when
+the END or STOP keyword is encountered and when the program
+stops when the end of buffer is reached and when a ctrl-c 
+is used to stop a running program.
+
+10 close #1
+
+The '#' is required.
+An error occurs if the file is already closed.
+
+
+
+--- REWIND ---
+
+The keyword 'rewind' points the file position back to 
+the start of an open file. This is used to re-read a file
+like the RESTORE keyword is used in READ/DATA statements.
+
+10 rewind #1
+
+The '#' is required.
+An error occurs if the file is closed.
+
+NOTE: When the file is opened, if the file already exists,
+reading will start from the BEGINNING of the file. ALL writing
+will be APPENDED to the END of the file. Use the 
+operating system commands to delete the contents of an existing
+file if needed.
+
+This is to prevent you from destroying a data file by mistake.
+
+--- EXAMPLES ---
+
+10 rem create a file, write to it
+20 open test.txt as #1
+30 for n=1 to 10
+40 print #1 n
+50 next n
+60 close #1
+99 end
+
+
+To read the just created file:
+10 open test.txt as #1
+20 for n=1 to 10
+30 input #1 a(n)
+40 print a(n)
+50 next n
+60 print "again" 
+70 rewind #1
+80 for n=1 to 10
+90 input #1 x
+100 print x
+110 next n
+120 close #1
+125 print "results"
+130 for n=1 to 10
+140 print a(n)
+150 next n
+160 end
+run
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+again
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+results
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Ready.
 
 
 --------------------------------------------------

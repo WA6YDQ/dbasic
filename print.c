@@ -18,11 +18,38 @@ int run_print(char *line) {
 	//extern float *NumVar[26];
 	extern int error;
 	error = 0;
+	extern FILE *fd[8];
+	extern int fdnumber;
+	int ISFILE=0;			// flag for file operations
 
 	while (isdigit(*line++));							// skip past line number
 	if (isblank(*line)) while (isblank(*line)) line++;;	// skip spaces
 	while (isalpha(*line++));							// skip 'print'
 	
+	// test for file#
+	if (isblank(*line)) while (isblank(*line)) line++;
+	if (*line == '#') {		// print to a file 
+		ISFILE=1;
+		line++;				// skip past #
+		if (!(isdigit(*line))) {
+			printf("Error - bad syntax in PRINT\n");
+			return -1;
+		}
+		fdnumber = atoi(line);
+		if (fdnumber < 1 || fdnumber > 7) {		// 1-7 allowed
+			printf("Error - bad file number %d in PRINT\n",fdnumber);
+			return -1;
+		}
+		/* make sure it's already opened */
+		if (fd[fdnumber] == NULL) {
+			printf("Error - file number %d is not opened\n",fdnumber);
+			return -1;
+		}
+		line++;			// skip file number
+	}
+
+
+
 	while (1) {
 		if (*line == '\0') break;
 		
@@ -40,7 +67,10 @@ int run_print(char *line) {
 					printf("\nError - unequal quotes in PRINT. \n");
 					return -1;
 				}
-				printf("%c",*line);
+				if (!ISFILE) 
+					printf("%c",*line);
+				else
+					fprintf(fd[fdnumber],"%c",*line);
 				line++;
 			}
 			line++;		// skip closing "
@@ -49,14 +79,20 @@ int run_print(char *line) {
 
 		/* comma shows 3 spaces */
 		if (*line == ',') {
-			printf("   ");
+			if (!ISFILE) 
+				printf("   ");
+			else
+				fprintf(fd[fdnumber],"   ");
 			line++;
 			continue;
 		}
 
 		/* strings a$ - z$ */
 		if (*line >= 'a' && *line <= 'z' && *(line+1) == '$') {
-			printf("%s",CharVars[*line-'a']);
+			if (!ISFILE) 
+				printf("%s",CharVars[*line-'a']);
+			else
+				fprintf(fd[fdnumber],"%s",CharVars[*line-'a']);
 			line +=2;
 			continue;
 		}
@@ -77,13 +113,19 @@ int run_print(char *line) {
 			printf("\nError - eval error in print()\n");
 			return -1;
 		}
-		printf("%g",res);
+		if (!ISFILE)
+			printf("%g",res);
+		else
+			fprintf(fd[fdnumber],"%g",res);
 		continue;
 
 
 	}
 
 	if (*(line-1) == ';') return 0;
-	printf("\n");
+	if (!ISFILE)
+		printf("\n");
+	else
+		fprintf(fd[fdnumber],"\n");
 	return 0;
 }

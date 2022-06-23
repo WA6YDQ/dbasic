@@ -9,7 +9,8 @@ The binary 'dbasic' will be installed in /usr/local/bin
 Statements in this version of BASIC:
  REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
  IF/THEN, FOR/NEXT/STEP, INPUT, READ, DATA,
- RESTORE, ON/GOTO, ON/GOSUB, CLEAR, STOP, DEF
+ RESTORE, ON/GOTO, ON/GOSUB, CLEAR, STOP, DEF,
+ OPEN, CLOSE, REWIND
 
 Expressions: a+b, a-b, a*b, a/b, a**b, -a
  
@@ -66,7 +67,8 @@ and keywords not in the original specification in this version.
 
 --- Language exceptions ---
 In the original Dartmouth BASIC you could have spaces (or
-not) scattered anywhere. This is ugly. Don't write ugly code.
+not) scattered anywhere. In dbasic keywords and functions 
+must be surrounded by spaces.
 
 In Darthmouth, GO TO is ok to use. Here, use GOTO, no spaces.
 Same applied to ON..GO TO. Use ON..GOTO instead.
