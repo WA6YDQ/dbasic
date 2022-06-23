@@ -24,10 +24,10 @@ int run_input(char *line) {
 	while (isdigit(*line)) line++;		// skip line number
 	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
 	while (isalpha(*line)) line++;		// skip keyword
-
-	// test for file#
     if (isblank(*line)) while (isblank(*line)) line++;
-    if (*line == '#') {     // print to a file 
+    
+	// test for file #
+	if (*line == '#') {     // print to a file 
         ISFILE=1;
         line++;             // skip past #
         if (!(isdigit(*line))) {
@@ -56,7 +56,7 @@ int run_input(char *line) {
 	while (1) {		// loop and test until EOL
 
 		/* test for end of file - return error if reached */
-		if (feof(fd[fdnumber])) {
+		if (ISFILE && feof(fd[fdnumber])) {
 			printf("Warning - Reached end of file\n");
 			return 0;
 		}
