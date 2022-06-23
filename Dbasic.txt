@@ -923,5 +923,31 @@ enter formula ?sin(a)*cos(a)
 0.456473
 Ready.
 
+Here is a BASIC program that allows the user to enter
+any number of variables and a formula without knowing 
+how to program:
 
+10 print "Enter number of variables ";
+20 input n
+30 for x=1 to n
+40 print "Enter value of variable a(";x;"): "
+50 input a(x)
+60 next x
+70 print "Enter formula: ";f$
+80 input f$
+90 let v=val(f$)
+100 print "Result=";v
+110 end
+Ready.
+run
+Enter number of variables ?2
+Enter value of variable a(1): 
+?1.2e-6
+Enter value of variable a(2): 
+?220e-12
+Enter formula: 
+?1/(6.28*sqr(a(1)*a(2)))
+Result=9.80028e+06
+Ready.
+ 
 
