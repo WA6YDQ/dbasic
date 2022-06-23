@@ -23,6 +23,7 @@ int run_ifthen(char *line) {
 	int n=0;
 	char expr[LINESIZE] = {'\0'};					// expression for eval()
 	int isoperand(char);
+	extern int error;
 
 	// debug
 	// printf("line is [%s]\n",line);
@@ -49,7 +50,9 @@ int run_ifthen(char *line) {
 		}
 	}
 
+	error = 0;
 	lvalue = eval(expr);
+	if (error == -1) return error;
 
 	/* get test variable */
 	int testchar = 0;
@@ -98,7 +101,10 @@ int run_ifthen(char *line) {
 			return -1;
 		}
 	}
+
+	error = 0;
 	rvalue = eval(expr);
+	if (error == -1) return error;
 
 	/* get THEN statement */
 	if (isblank(*line)) while (isblank(*line)) line++;

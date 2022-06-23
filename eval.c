@@ -334,12 +334,18 @@ float eval(char *expr) {
 						return error;
 					}
 					fdnumber = atoi(&funcval[1]);
+					if (fd[fdnumber] == NULL) {
+						printf("Error - file %d is not open\n",fdnumber);
+						error = -1;
+						return error;
+					}
 					if (feof(fd[fdnumber])) 
 						fvalue = 1;
 					else
 						fvalue = 0;
 					goto funcend;
 				}
+
 
 				// not a recognized function
 				printf("Error - unknown numeric function %s\n",funcname);
