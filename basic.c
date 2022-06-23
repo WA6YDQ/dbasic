@@ -19,7 +19,7 @@
  Functions: SIN(), COS(), TAN(), EXP(), LN(),
  LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
  CHR$(), FNx, INT(), ABS(), SGN(), ATN(), LEN(),
- RND(), RAD(), DEC(), SPC(), VAL()
+ RND(), RAD(), DEC(), SPC(), VAL(), EOF()
 
  Floating point numeric variables are a...z
  a(0)..a(10) ... z(0)..z(10) are pre-defined

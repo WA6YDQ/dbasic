@@ -55,13 +55,26 @@ int fileopen(char *line) {
 		return -1;
 	}
 
+	/* strip off any double quotes that may be on the filename */
+	char filename[LINESIZE] = {'\0'}; n=0; int x=0;
+	while (1) {
+		if (o_filename[x] == '\0') break;
+		if (o_filename[x] == '"') {
+			x++;
+			continue;
+		}
+		filename[n] = o_filename[x];
+		x++; n++;
+	}
+
+
 	/* if the file exists, all reading will be at the beginning of the file
 	 * however, any writing will be appended to the end of the file */
-	fd[fdnumber] = fopen(o_filename,"a+");
+	fd[fdnumber] = fopen(filename,"a+");
 	if (fd[fdnumber] == NULL) {			// file doesn't exist - reopen as write
-		fd[fdnumber] = fopen(o_filename,"w+");
+		fd[fdnumber] = fopen(filename,"w+");
 		if (fd[fdnumber] == NULL) {		// can't create file
-			printf("Error - cannot open file %s\n",o_filename);
+			printf("Error - cannot open file %s\n",filename);
 			return -1;
 		}
 	}

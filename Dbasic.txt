@@ -277,6 +277,19 @@ statement, all input will be read from an open file.
 10 input #1 n
  
 See FILE OPERATIONS below for examples.
+NOTE: if end of file is reached, a warning will be printed
+but the program will continue to run. Use the function eof(#n)
+where n is the file number from 1-7 inclusive to test for an 
+end of file. EOF() returns 1 on end of file.
+
+Example:
+10 open test.txt as #1
+20 if eof(#1) = 1 then 90
+30 input #1 n
+40 print n
+50 goto 20
+90 close #1
+100 end
 
 
 --- LET ---
@@ -613,6 +626,8 @@ open [filename] as #[file number]
 
 where filename is a path name (includes directorys name
 is needed) and file numbers are 1-7 inclusive.
+NOTE: the filename is NOT quoted (ie "file.txt")
+Any double quotes will be removed.
 
 The keyword 'as' is required. The '#' preceeding the 
 file number is also required.
@@ -731,6 +746,22 @@ results
 10
 Ready.
 
+
+NOTE: if end of file is reached, a warning will be printed
+but the program will continue to run. Use the function eof(#n)
+where n is the file number from 1-7 inclusive to test for an 
+end of file. EOF() returns 1 on end of file. End of file is only 
+tested when using the INPUT statement. It is meaningless when
+writing to a file (PRINT #).
+
+Example:
+10 open test.txt as #1
+20 if eof(#1) = 1 then 90
+30 input #1 n
+40 print n
+50 goto 20
+90 close #1
+100 end
 
 --------------------------------------------------
 ------------------ FUNCTIONS ---------------------
@@ -1116,4 +1147,19 @@ Enter formula:
 Result=9.80028e+06
 Ready.
  
+--- EOF() ---
+
+The eof() function returns 1 when an end of file is detected.
+Normally it returns a 0.
+
+An example of eof():
+
+10 open test.txt as #1
+20 if eof(#1) = 1 then 90
+30 input #1 n
+40 print n
+50 goto 20
+90 close #1
+100 end
+
 

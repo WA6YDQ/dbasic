@@ -55,6 +55,12 @@ int run_input(char *line) {
 
 	while (1) {		// loop and test until EOL
 
+		/* test for end of file - return error if reached */
+		if (feof(fd[fdnumber])) {
+			printf("Warning - Reached end of file\n");
+			return 0;
+		}
+
 		if (*line == '\0') break;	// EOL
 		if (*line == ',' || *line == ';' || *line == ' ') {			// ignore ,;[ ]
 			line++;
@@ -83,7 +89,13 @@ int run_input(char *line) {
 			memset(CharVars[strvar-'a'],0,sizeof(CharVars[strvar-'a']));
 			if (!ISFILE) printf("?");
 			if (!ISFILE) fgets(getline,LINESIZE,stdin);
-			if (ISFILE) fgets(getline,LINESIZE,fd[fdnumber]);
+			if (ISFILE) {
+				fgets(getline,LINESIZE,fd[fdnumber]);
+				if (feof(fd[fdnumber])) {
+					printf("Warning - reached end of file\n");
+					return 0;
+				}
+			}
 			getline[strlen(getline)-1] = '\0';		// strip off \n
 			strcpy(CharVars[strvar-'a'],getline);
 			line += 2;
@@ -117,7 +129,13 @@ int run_input(char *line) {
 
 			if (!ISFILE) printf("?");
 			if (!ISFILE) fgets(getline,LNSIZE,stdin);		// 20 chars max for digits
-			if (ISFILE) fgets(getline,LNSIZE,fd[fdnumber]);
+			if (ISFILE) {
+				fgets(getline,LNSIZE,fd[fdnumber]);
+				if (feof(fd[fdnumber])) {
+                    printf("Warning - reached end of file\n");
+                    return 0;
+                }
+            }
 			NumVar[charvar-'a'][subscript] = eval(getline);		// save value
 			line++;
 			continue;

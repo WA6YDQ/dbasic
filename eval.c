@@ -76,6 +76,8 @@ float eval(char *expr) {
 	extern char fn[26][80];
 	extern char CharVars[26][LINESIZE];
 	extern int NumSize[26];
+	extern int fdnumber;
+	extern FILE *fd[8];
 
 	int NEGFLAG=0;		// true when unary - found
 
@@ -321,6 +323,21 @@ float eval(char *expr) {
 					}
 					/* try all between () */
 					fvalue = eval(funcval);
+					goto funcend;
+				}
+
+				/* EOF() - test if file number reached EOF() */
+				if (strncmp(funcname,"eof",3)==0) {
+					if (funcval[0] != '#') {
+						printf("Error - bad format in eof() for file number\b");
+						error = -1;
+						return error;
+					}
+					fdnumber = atoi(&funcval[1]);
+					if (feof(fd[fdnumber])) 
+						fvalue = 1;
+					else
+						fvalue = 0;
 					goto funcend;
 				}
 
