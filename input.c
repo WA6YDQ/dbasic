@@ -128,9 +128,9 @@ int run_input(char *line) {
             }
 
 			if (!ISFILE) printf("?");
-			if (!ISFILE) fgets(getline,LNSIZE,stdin);		// 20 chars max for digits
+			if (!ISFILE) fgets(getline,LINESIZE,stdin);		// 20 chars max for digits
 			if (ISFILE) {
-				fgets(getline,LNSIZE,fd[fdnumber]);
+				fgets(getline,LINESIZE,fd[fdnumber]);
 				if (feof(fd[fdnumber])) {
                     printf("Warning - reached end of file\n");
                     return 0;

@@ -269,6 +269,20 @@ Get user input:
 Both commas ',' and semi-colons ';' act just as in
 the PRINT statement above.
 
+When entering a number, an expression can be entered instead 
+and it will be evaluated before being saved:
+10 print "enter n"
+20 input n
+30 print n
+99 end
+run
+enter n
+?354*sin(20) + sqr(12) + 45/5
+335.647
+Ready.
+
+
+
 --- File Operations ---
 
 If a # and a file number occurs just after the INPUT 
@@ -284,13 +298,14 @@ end of file. EOF() returns 1 on end of file.
 
 Example:
 10 open test.txt as #1
-20 if eof(#1) = 1 then 90
-30 input #1 n
+20 input #1 n
+30 if eof(#1) = 1 then 90
 40 print n
 50 goto 20
 90 close #1
 100 end
 
+NOTE: eof() will return 1 ONLY after an INPUT statement.
 
 --- LET ---
 
@@ -756,12 +771,14 @@ writing to a file (PRINT #).
 
 Example:
 10 open test.txt as #1
-20 if eof(#1) = 1 then 90
-30 input #1 n
-40 print n
+20 input #1 a
+30 if eof(#1) = 1 then 90
+40 print a
 50 goto 20
 90 close #1
-100 end
+99 end
+
+NOTE: eof() will only return 1 AFTER an INPUT statement.
 
 --------------------------------------------------
 ------------------ FUNCTIONS ---------------------
@@ -1155,11 +1172,12 @@ Normally it returns a 0.
 An example of eof():
 
 10 open test.txt as #1
-20 if eof(#1) = 1 then 90
-30 input #1 n
-40 print n
+20 input #1 a
+30 if eof(#1) = 1 then 90
+40 print a
 50 goto 20
 90 close #1
-100 end
+99 end
 
 
+NOTE: eof will only return 1 AFTER an INPUT statement.
