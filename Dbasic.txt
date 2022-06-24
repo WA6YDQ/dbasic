@@ -641,8 +641,8 @@ open [filename] as #[file number]
 
 where filename is a path name (includes directorys name
 is needed) and file numbers are 1-7 inclusive.
-NOTE: the filename is NOT quoted (ie "file.txt")
-Any double quotes will be removed.
+NOTE: Use quotes around filenames to preserve case. However,
+the filenames will not have quotes. They are stripped.
 
 The keyword 'as' is required. The '#' preceeding the 
 file number is also required.
@@ -1181,3 +1181,19 @@ An example of eof():
 
 
 NOTE: eof will only return 1 AFTER an INPUT statement.
+
+Here is an example of a program to copy text files:
+10 open "prime10M.c" as #1
+20 open "nprime10M.c" as #2
+30 input #1 a$
+35 if eof(#1) = 1 then 90
+40 print #2 a$
+50 goto 30
+90 close #1
+100 close #2
+110 print "done"
+120 end
+
+The source file is in line 10
+The destination file is line 20
+
