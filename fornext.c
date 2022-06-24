@@ -1,4 +1,10 @@
-/* fornext.c - run_for and run_next */
+/* fornext.c - run_for and run_next 
+ *
+ * part of dbasic
+ *
+ * (C) k theis <theis.kurt@gmail.com> 2022
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

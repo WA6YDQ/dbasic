@@ -1,4 +1,9 @@
-/* data.c - data/read routines */
+/* data.c - data/read routines 
+ *
+ * part of dbasic
+ * (C) k theis <theis.kurt@gmail.com> 2022
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

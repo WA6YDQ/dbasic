@@ -1,3 +1,8 @@
+1 rem this program copies the text file in line 10
+2 rem to the text file in line 20
+3 rem use quotes around the filenames
+4 rem to protect mixed case letters
+5 rem
 10 open "prime10M.c" as #1
 20 open "nprime10M.c" as #2
 30 input #1 a$

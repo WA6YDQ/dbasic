@@ -89,7 +89,6 @@ int NumSize[26];				// used in DIM(). Stops from re-diming downwards.
 
 /* extern functions */
 int parse(char *);
-//int run_let(char *);
 int run_print(char *);
 int run_input(char *);
 int run_goto(char *);
@@ -106,9 +105,7 @@ int def(char *);
 int insert(char *);
 void load(char *);
 void save(char *);
-int show2();
 int dim(char *);
-// experimental
 int let(char *);
 int fileopen(char *);
 int fileclose(char *);
@@ -222,12 +219,12 @@ int parse(char *line) {
 		return 0;
 	}
 
-	if (strcmp(word,"dim")==0) {		// re-dimension numeric variable
+	if (strcmp(word,"dim")==0) {		// dim.c   re-dimension numeric variable
 		res = dim(line);
 		return res;
 	}
 
-	if (strcmp(word,"data")==0) {		// ignore data statements (handled elsewhere)
+	if (strcmp(word,"data")==0) {		// data.c   ignore data statements (handled elsewhere)
 		return 0;
 	}
 
@@ -236,12 +233,12 @@ int parse(char *line) {
 		return res;
 	}
 
-	if (strcmp(word,"restore")==0) {	// reset data pointer to 0
+	if (strcmp(word,"restore")==0) {	// data.c    reset data pointer to 0
 		DataPosition = 0;
 		return 0;
 	}
 
-	if (strcmp(word,"def")==0) {		// def fnx
+	if (strcmp(word,"def")==0) {		// def.c    def fnx
 		res = def(line);
 		return res;
 	}
@@ -522,7 +519,7 @@ runloop:
 runit:
 	/* 
 	 read each line in the buffer, parse 
-	 the statements, loop until END statement 
+	 the statements, loop until END, STOP, or buffer end 
 	 is reached or an error occurs.
 	 
 	*/
@@ -633,7 +630,7 @@ parseLoop:
 	}
 
 	/* test return code */
-	if (res == -998) {				// STOP statement
+	if (res == -998) {				// STOP statement (duplicate of END - future proof)
 		/* close all open file descriptors */
         for (int n=1; n<8; n++) {
             if (fd[n] != NULL) {

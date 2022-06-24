@@ -18,7 +18,7 @@ int let(char *line) {
 	int subscript = 0;			// array substring
 	char tmpstr[80] = {'\0'};		// used to extract vals
 	int n=0;
-	int error = 0;
+	extern int error;
 	float res = 0;
 	extern float *NumVar[26];	// numeric varaibles to use
 	extern char CharVars[][80];	// character variables to use
@@ -81,7 +81,6 @@ letloop:
 			printf("Error - mismatched parenthesis in LET\n");
 			return -1;
 		}
-		error = 0;
 		strcpy(CharVars[charvar-'a'],evalstring(tmpstr));
 		if (error == -1) {
 			printf("Error - bad string expression in LET statement\n");
@@ -117,7 +116,6 @@ letloop:
 			line++; n++;
 		}
 		line++;			// skip )
-		error = 0;
 		res = eval(tmpstr);
 		if (error == -1) {
 			printf("Error - subscript evaluation failed in LET statement\n");
@@ -159,7 +157,6 @@ letloop:
 		line++; n++;
 	}
 	/* tmpstr holds expression */
-	error = 0;
 	res = eval(tmpstr);
 	if (error == -1) {
 		printf("Error - bad expression [%s] in LET statement\n",tmpstr);

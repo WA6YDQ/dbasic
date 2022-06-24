@@ -1,6 +1,11 @@
 /* ifthen.c - if (expression) =, !=, <, > (expression) then [line number] */
 /* test 2 values - if they match the text chars, return a line number
  * else return 0 (failed test)
+ *
+ *  part of dbasic
+ *
+ *  (C) k theis <theis.kurt@gmail.com> 2022
+ *
  */
 
 
@@ -50,7 +55,6 @@ int run_ifthen(char *line) {
 		}
 	}
 
-	error = 0;
 	lvalue = eval(expr);
 	if (error == -1) return error;
 
@@ -102,7 +106,6 @@ int run_ifthen(char *line) {
 		}
 	}
 
-	error = 0;
 	rvalue = eval(expr);
 	if (error == -1) return error;
 

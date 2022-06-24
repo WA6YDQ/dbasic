@@ -1,4 +1,11 @@
-/* input.c - run INPUT command */
+/* input.c
+ *
+ * part of dbasic
+ * (C) k theis <theis.kurt@gmail.com> 2022
+ *
+ * BASIC INPUT statement
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

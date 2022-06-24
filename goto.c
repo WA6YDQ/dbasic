@@ -1,4 +1,13 @@
-/* goto line number */
+/* goto.c
+ *
+ * part of dbasic
+ *
+ * (C) k theis <theis.kurt@gmail.com> 2022
+ *
+ * GOTO and ON GOTO, GOSUB and ON GOSUB routines
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

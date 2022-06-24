@@ -1,5 +1,7 @@
 /* file.c - file operations for dbasic
  *
+ * part of dbasic
+ *
  * (C) 2022 K Theis <theis.kurt@gmail.com>
  *
  */

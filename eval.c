@@ -285,15 +285,6 @@ float eval(char *expr) {
 					fvalue = tvalue * 3.141592654/180.0;
 					goto funcend;
 				}
-				/* SPC(x) print number of spaces based on x value */
-				if (strncmp(funcname,"spc",3)==0) {
-					int tvalue = (int)eval(funcval);
-					if (tvalue < 0) tvalue = 0;
-					if (tvalue > 79) tvalue = 79;
-					for (int n=0; n<tvalue; n++) printf(" ");
-					fvalue = NAN;		// don't actually return a value
-					goto funcend;
-				}
 				/* PI() return pi */
 				if (strncmp(funcname,"pi",2)==0) {
 					fvalue = 3.141592654;
@@ -331,13 +322,13 @@ float eval(char *expr) {
 					if (funcval[0] != '#') {
 						printf("Error - bad format in eof() for file number\b");
 						error = -1;
-						return error;
+						return NAN;
 					}
 					fdnumber = atoi(&funcval[1]);
 					if (fd[fdnumber] == NULL) {
 						printf("Error - file %d is not open\n",fdnumber);
 						error = -1;
-						return error;
+						return NAN;
 					}
 					if (feof(fd[fdnumber])) 
 						fvalue = 1;
@@ -350,7 +341,7 @@ float eval(char *expr) {
 				// not a recognized function
 				printf("Error - unknown numeric function %s\n",funcname);
 				error = -1;
-				return error;
+				return NAN;
 		
 funcend:		// put function result in list for later
 				val[valpos] = fvalue;
@@ -411,7 +402,7 @@ funcend:		// put function result in list for later
 			if (subscript < 0 || subscript > NumSize[charvar-'a']) {
 				printf("Error - bounds error in subscript: %c(%d)\n",charvar,subscript);
 				error = -1;
-				return error;
+				return NAN;
 			}
 
 			float res = NumVar[charvar-'a'][subscript];
@@ -467,11 +458,7 @@ funcend:		// put function result in list for later
 		/* undefined character in expression */	
 		printf("eval: unknown char '%c' in expression.\n",*expr);
 		error = -1;
-		return error;
-
-		//expr += 1;
-		//continue;
-
+		return NAN;
 	
 
 	}
@@ -485,7 +472,7 @@ funcend:		// put function result in list for later
 	/* error checking */
 	if (mathchrpos == 1 && valpos > 2) {
 		error = -1;
-		return error;
+		return NAN;
 	}
 
 

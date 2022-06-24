@@ -1,4 +1,10 @@
-/* dim.c - dbasic numeric arrays */
+/* dim.c - dbasic numeric arrays 
+ *
+ * part of dbasic
+ *
+ * (C) k theis <theis.kurt@gmail.com> 2022
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

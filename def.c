@@ -1,4 +1,10 @@
-/* def.c - define 26 user functions (DFA..DFZ) */
+/* def.c - define 26 user functions (DFA..DFZ) 
+ *
+ * part of dbasic
+ *
+ * (C) k theis <theis.kurt@gmail.com> 2022
+ *
+ */ 
 
 #include <stdio.h>
 #include <stdlib.h>

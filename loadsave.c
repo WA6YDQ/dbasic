@@ -1,4 +1,10 @@
-/* loadsave.c - load a file to buffer, save the buffer to file */
+/* loadsave.c - load a file to buffer, save the buffer to file 
+ *
+ * part of dbasic
+ *
+ * (C) k theis <theis.kurt@gmail.com> 2022
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

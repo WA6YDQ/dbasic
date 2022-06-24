@@ -1,4 +1,12 @@
-/* print BASIC command */
+/* print.c
+ *
+ * part of dbasic
+ * (C) k theis <theis.kurt@gmail.com>
+ *
+ * BASIC PRINT statement
+ *
+ */
+
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -17,7 +25,6 @@ int run_print(char *line) {
 	//extern char tempCharVar[MAXLINESIZE];
 	//extern float *NumVar[26];
 	extern int error;
-	error = 0;
 	extern FILE *fd[8];
 	extern int fdnumber;
 	int ISFILE=0;			// flag for file operations
@@ -67,10 +74,8 @@ int run_print(char *line) {
 					printf("\nError - unequal quotes in PRINT. \n");
 					return -1;
 				}
-				if (!ISFILE) 
-					printf("%c",*line);
-				else
-					fprintf(fd[fdnumber],"%c",*line);
+				if (!ISFILE) printf("%c",*line);
+				if (ISFILE)	fprintf(fd[fdnumber],"%c",*line);
 				line++;
 			}
 			line++;		// skip closing "
@@ -79,20 +84,41 @@ int run_print(char *line) {
 
 		/* comma shows 3 spaces */
 		if (*line == ',') {
-			if (!ISFILE) 
-				printf("   ");
-			else
-				fprintf(fd[fdnumber],"   ");
+			if (!ISFILE) printf("   ");
+			if (ISFILE)	fprintf(fd[fdnumber],"   ");
 			line++;
 			continue;
 		}
 
+		/* SPC() function */
+		if (*line == 's' && *(line+1)=='p' && *(line+2)=='c' && *(line+3)=='(') {
+			line += 4;
+			char TEMP[LINESIZE]={'\0'}; int n=0; int pc=0;
+			while (1) {
+				if (*line == ')' && pc == 0) break;
+				if (*line == '(') pc++;
+				if (*line == ')') pc--;
+				if (*line == '\0') {
+					printf("Error - syntax error in SPC()\n");
+					return -1;
+				}
+				TEMP[n] = *line;
+				n++; line++;
+			}
+			line++;		// skip )
+			n = eval(TEMP);
+			for (int i=0; i<n; i++) {
+				if (!ISFILE) printf(" ");
+				if (ISFILE) fprintf(fd[fdnumber]," ");
+			}
+			continue;
+		}
+
+
 		/* strings a$ - z$ */
 		if (*line >= 'a' && *line <= 'z' && *(line+1) == '$') {
-			if (!ISFILE) 
-				printf("%s",CharVars[*line-'a']);
-			else
-				fprintf(fd[fdnumber],"%s",CharVars[*line-'a']);
+			if (!ISFILE) printf("%s",CharVars[*line-'a']);
+			if (ISFILE)	fprintf(fd[fdnumber],"%s",CharVars[*line-'a']);
 			line +=2;
 			continue;
 		}
@@ -113,19 +139,15 @@ int run_print(char *line) {
 			printf("\nError - eval error in print()\n");
 			return -1;
 		}
-		if (!ISFILE)
-			printf("%g",res);
-		else
-			fprintf(fd[fdnumber],"%g",res);
+		if (!ISFILE) printf("%g",res);
+		if (ISFILE)	fprintf(fd[fdnumber],"%g",res);
 		continue;
 
 
 	}
 
 	if (*(line-1) == ';') return 0;
-	if (!ISFILE)
-		printf("\n");
-	else
-		fprintf(fd[fdnumber],"\n");
+	if (!ISFILE) printf("\n");
+	if (ISFILE)	fprintf(fd[fdnumber],"\n");
 	return 0;
 }

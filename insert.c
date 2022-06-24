@@ -1,4 +1,12 @@
-/* insert.c - insert a line into the basic buffer */
+/* insert.c
+ *
+ * part of dbasic
+ *
+ * (C) k theis <theis.kurt@gmail.com> 2022
+ *
+ * edit routines for interactive dbasic
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

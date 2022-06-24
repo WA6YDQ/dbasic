@@ -210,11 +210,11 @@ Semi-colons stop spacing and linefeeds when used at line end
 40 print "this is a te";
 50 print "st of the print statement"
 
-5 rem printing expressions
-10 print 25*sqr(9)*12*(3+4)
-
 Commas print 3 spaces, everything between double quotes " " 
 is printed as is.
+
+Math expressions are evaluated and printed:
+10 print 25*sqr(9)*12*(3+4)
 
 NOTE: The PRINT statement will NOT evaluate string
 expressions:
@@ -230,6 +230,7 @@ This is true for left$(), mid$(), right$(), chr$()
 The SPC() function will print the number of spaces 
 between (). 
 10 print spc(5);"This is printed with leading spaces"
+20 print spc(n) "*"
 
 See the SPC() function below for more examples.
 
@@ -253,6 +254,8 @@ file if needed.
 
 This is to prevent you from destroying a data file by mistake.
 
+
+
 --- INPUT ---
 
 Get user input:
@@ -266,8 +269,9 @@ Get user input:
 20 input "Enter a string: ",a$
 30 print "You entered ";a$
 
-Both commas ',' and semi-colons ';' act just as in
-the PRINT statement above.
+Commas are used only to separate variables. 
+Unlike the PRINT statement, commas and semicolons have no
+effect on printing.
 
 When entering a number, an expression can be entered instead 
 and it will be evaluated before being saved:
@@ -290,11 +294,20 @@ statement, all input will be read from an open file.
 
 10 input #1 n
  
+For each variable used, one line will be read from the
+specified file and it's contents will be saved in that variable.
+If there are multiple numbers on a line separated by spaces,
+commas, etc, unpredictable results will occur.
+
+Use a string variable (a$...z$) if you need to read an
+entire line.
+
 See FILE OPERATIONS below for examples.
 NOTE: if end of file is reached, a warning will be printed
-but the program will continue to run. Use the function eof(#n)
+and the input operation will exit. Use the function eof(#n)
 where n is the file number from 1-7 inclusive to test for an 
-end of file. EOF() returns 1 on end of file.
+end of file. EOF() returns 1 on end of file, and 0 if data
+is still available.
 
 Example:
 10 open test.txt as #1
@@ -306,6 +319,8 @@ Example:
 100 end
 
 NOTE: eof() will return 1 ONLY after an INPUT statement.
+
+
 
 --- LET ---
 
@@ -351,6 +366,7 @@ Do this instead:
 
 NOTE: for/next loops CANNOT be nested. This may change
 in future releases of dbasic.
+
 
 
 --- IF/THEN ---
@@ -639,10 +655,10 @@ The format to open a file:
 
 open [filename] as #[file number]
 
-where filename is a path name (includes directorys name
-is needed) and file numbers are 1-7 inclusive.
-NOTE: Use quotes around filenames to preserve case. However,
-the filenames will not have quotes. They are stripped.
+where filename is a path name (includes directories name
+if needed) and file numbers are 1-7 inclusive.
+NOTE: Use quotes around filenames to preserve case. Quotes, 
+however, are not necessary.
 
 The keyword 'as' is required. The '#' preceeding the 
 file number is also required.
@@ -667,8 +683,8 @@ This is to prevent you from destroying a data file by mistake.
 
 Use the keyword 'close' to close an existing file.
 Note that files are automatically closed on errors, when
-the END or STOP keyword is encountered and when the program
-stops when the end of buffer is reached and when a ctrl-c 
+the END or STOP keyword is encountered, when the program
+stops, when the end of buffer is reached and when a ctrl-c 
 is used to stop a running program.
 
 10 close #1
@@ -763,9 +779,10 @@ Ready.
 
 
 NOTE: if end of file is reached, a warning will be printed
-but the program will continue to run. Use the function eof(#n)
-where n is the file number from 1-7 inclusive to test for an 
-end of file. EOF() returns 1 on end of file. End of file is only 
+but the program will continue to run. Any input statements 
+will be ignored. Use the function eof(#n) where n is the file 
+number from 1-7 inclusive to test for an end of file. 
+EOF() returns 1 on end of file. End of file is only 
 tested when using the INPUT statement. It is meaningless when
 writing to a file (PRINT #).
 
@@ -1063,16 +1080,22 @@ Ready.
 --- SPC() ---
 
 The spc function prints spc(x) number of spaces where
-x is a positive integer > 0.
+x is a positive integer > 0. x may be a number or expression.
 
 5 rem print a sine wave. use ctrl-c to exit
 10 for n=0 to 2*pi(0) step (pi(0)/60)
 20 let d=deg(sin(n))
 25 rem scale to fit on the display
 30 let d=(d+58)/2.5
-40 print spc(d);"*"
+40 print spc(d) "*"
 50 next n
 60 goto 10
+
+5 rem more compact version of sinewave.bas
+10 let s=3/8
+20 for n=-6.28 to 6.28 step s
+40 print spc(deg(sin(n))/5+30) "*"
+50 next n
 
 
 --- VAL() ---
@@ -1164,6 +1187,8 @@ Enter formula:
 Result=9.80028e+06
 Ready.
  
+
+
 --- EOF() ---
 
 The eof() function returns 1 when an end of file is detected.
