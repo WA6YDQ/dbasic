@@ -18,15 +18,25 @@ int fileopen(char *line) {
 	extern FILE *fd[8];
 	extern int fdnumber;
 	
-	/* format: linenum open [filename] as #[n] */
+	/* format: linenum OPEN [filename] FOR mode AS #[n] */
 	char ln[LNSIZE]={'\0'}, cmd[LINESIZE]={'\0'}, \
 		o_filename[LINESIZE]={'\0'}, cmd2[LINESIZE]={'\0'}, \
-		o_filenum[LNSIZE]={'\0'};
+		o_mode[LINESIZE]={'\0'},  cmd3[LINESIZE]={'\0'}, o_filenum[LNSIZE]={'\0'};
 
-	sscanf(line,"%s %s %s %s %s",ln,cmd,o_filename,cmd2,o_filenum);
+	sscanf(line,"%s %s %s %s %s %s %s",ln,cmd,o_filename,cmd2,o_mode,cmd3,o_filenum);
 	/* ln and cmd pass or we wouldn't be here */
-	if (strcmp(cmd2,"as")!=0) {
-		printf("Error - expected 'as' keyword, got %s\n",cmd2);
+	if (strcmp(cmd,"for")==0) {
+		printf("Error - expected 'for' keyword, got %s\n",cmd2);
+		return -1;
+	}
+	
+	if (!(strcmp(o_mode,"input")==0 || strcmp(o_mode,"output")==0 || strcmp(o_mode,"append")==0)) {
+		printf("Error - bad mode: expected 'input', 'output' or 'append', got %s\n",o_mode);
+		return -1;
+	}
+
+	if (strcmp(cmd3,"as")!=0) {
+		printf("Error - expected 'as' keyword, got %s\n",cmd3);
 		return -1;
 	}
 
@@ -69,17 +79,23 @@ int fileopen(char *line) {
 		x++; n++;
 	}
 
-
-	/* if the file exists, all reading will be at the beginning of the file
-	 * however, any writing will be appended to the end of the file */
-	fd[fdnumber] = fopen(filename,"a+");
-	if (fd[fdnumber] == NULL) {			// file doesn't exist - reopen as write
-		fd[fdnumber] = fopen(filename,"w+");
-		if (fd[fdnumber] == NULL) {		// can't create file
-			printf("Error - cannot open file %s\n",filename);
-			return -1;
-		}
+	/* open/create file based on it's mode */
+	if (strcmp(o_mode,"input")==0) {		// open for read
+		fd[fdnumber] = fopen(filename,"r");
 	}
+
+	if (strcmp(o_mode,"output")==0) {		// open for write
+		fd[fdnumber] = fopen(filename,"w");
+	}
+
+	if (strcmp(o_mode,"append")==0) {		// open for append
+		fd[fdnumber] = fopen(filename,"a+");
+	}
+
+	if (fd[fdnumber] == NULL) {
+            printf("Error - could not open file %s for %s\n",filename,o_mode);
+            return -1;
+    }
 
 	return 0;
 }

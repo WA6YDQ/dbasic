@@ -643,27 +643,40 @@ are used to manipulate files.
 
 --- OPEN ---
 
-Use the keyword 'open' to open a file for reading/writing.
-
-If a file already exists when opened, it will be opened
-in the read+append mode. 
-
-If the file does not already exist, it will be created in
-write+read mode.
+Use the keyword 'open' to open a file, with options to 
+input data from the file, append data to the file or write
+data to the file..
 
 The format to open a file:
 
-open [filename] as #[file number]
+open [filename] for [mode] as #[file number]
 
-where filename is a path name (includes directories name
-if needed) and file numbers are 1-7 inclusive.
+Filename is a path name (includes directories name
+if needed).
+
+Mode is input, output and append.
+
+Input means the file is opened for read only. If the
+file does not exist, an error will occur.
+
+Output means write only. If the file exists, it will
+be overwritten.
+
+Append means open for read with the file pointer at 
+the start of the file, but any data written to the file
+will be appended to the end of the file.
+
+File numbers are 1-7 inclusive.
+
 NOTE: Use quotes around filenames to preserve case. Quotes, 
 however, are not necessary.
 
-The keyword 'as' is required. The '#' preceeding the 
-file number is also required.
+The keyword 'for' is required.
+The keyword 'as' is required. 
+The '#' preceeding the file number is also required.
 
-10 open test.txt as #1
+Example:
+10 open test.txt for input as #1
 
 If the filenumber is already used (a file with the filenumber
 is currently opened) an error will be reported.
@@ -671,13 +684,7 @@ is currently opened) an error will be reported.
 If the file cannot be opened (insufficent space, no permissions
 to access the file, etc) an error will be reported.
 
-NOTE: When the file is opened, if the file already exists,
-reading will start from the BEGINNING of the file. ALL writing
-will be APPENDED to the END of the file. Use the 
-operating system commands to delete the contents of an existing
-file if needed.
 
-This is to prevent you from destroying a data file by mistake.
 
 --- CLOSE ---
 
@@ -697,26 +704,19 @@ An error occurs if the file is already closed.
 --- REWIND ---
 
 The keyword 'rewind' points the file position back to 
-the start of an open file. This is used to re-read a file
-like the RESTORE keyword is used in READ/DATA statements.
+the start of an open file. This is used to re-read an input 
+file like the RESTORE keyword is used in READ/DATA statements.
 
 10 rewind #1
 
 The '#' is required.
 An error occurs if the file is closed.
 
-NOTE: When the file is opened, if the file already exists,
-reading will start from the BEGINNING of the file. ALL writing
-will be APPENDED to the END of the file. Use the 
-operating system commands to delete the contents of an existing
-file if needed.
-
-This is to prevent you from destroying a data file by mistake.
 
 --- EXAMPLES ---
 
 10 rem create a file, write to it
-20 open test.txt as #1
+20 open test.txt for output as #1
 30 for n=1 to 10
 40 print #1 n
 50 next n
@@ -725,7 +725,7 @@ This is to prevent you from destroying a data file by mistake.
 
 
 To read the just created file:
-10 open test.txt as #1
+10 open test.txt for input as #1
 20 for n=1 to 10
 30 input #1 a(n)
 40 print a(n)
@@ -1196,7 +1196,7 @@ Normally it returns a 0.
 
 An example of eof():
 
-10 open test.txt as #1
+10 open test.txt for input as #1
 20 input #1 a
 30 if eof(#1) = 1 then 90
 40 print a
@@ -1208,8 +1208,8 @@ An example of eof():
 NOTE: eof will only return 1 AFTER an INPUT statement.
 
 Here is an example of a program to copy text files:
-10 open "prime10M.c" as #1
-20 open "nprime10M.c" as #2
+10 open "prime10M.c" for input as #1
+20 open "nprime10M.c" for output as #2
 30 input #1 a$
 35 if eof(#1) = 1 then 90
 40 print #2 a$
@@ -1221,4 +1221,4 @@ Here is an example of a program to copy text files:
 
 The source file is in line 10
 The destination file is line 20
-
+Note the quotes around the filenames to preserve case.
