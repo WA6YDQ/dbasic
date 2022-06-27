@@ -19,7 +19,8 @@
  Functions: SIN(), COS(), TAN(), EXP(), LN(),
  LOG(), SQR(), LEFT$(), RIGHT$(), MID$(), ASC(),
  CHR$(), FNx, INT(), ABS(), SGN(), ATN(), LEN(),
- RND(), RAD(), DEC(), SPC(), VAL(), EOF()
+ RND(), RAD(), DEC(), SPC(), VAL(), EOF(), STR$(),
+ TIME()
 
  Floating point numeric variables are a...z
  a(0)..a(10) ... z(0)..z(10) are pre-defined
@@ -32,7 +33,7 @@
  keywords:
  string functions: 
  math functions: 
- misc functions: NOT(), TIME(), TAB()
+ misc functions: NOT(), TAB()
 
 
 	To build this:
@@ -76,6 +77,7 @@ char fn[26][LINESIZE]={'\0'};				// function definitions
 int error = 0;					// used by eval(), 0 is OK, -1 is expression error
 char tempCharVar[MAXLINESIZE];		// used in evalstring()
 int RUNSTOP=0;					// ctrl-C handler
+long int BASICSTART = 0l;		// time (in seconds) since basic started
 
 // these are file descripters
 FILE *fd[8];
@@ -403,6 +405,9 @@ int main(int argc, char **argv) {
 	int LOADFLAG = 0;
 	int res = 0;
 	RUNSTOP = 0;
+
+	/* get the time in seconds, use as offset for time() function */
+	BASICSTART = time(NULL);
 
 	signal(SIGINT, ignoreC);		// ignore ctrl-C
 

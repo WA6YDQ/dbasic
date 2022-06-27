@@ -72,6 +72,7 @@ float domath(float lval, float rval, char ch) {
 /* return float value of supplied expression */
 float eval(char *expr) {
 
+	extern long int BASICSTART;
 	extern float *NumVar[26];
 	extern char fn[26][80];
 	extern char CharVars[26][LINESIZE];
@@ -337,6 +338,15 @@ float eval(char *expr) {
 					goto funcend;
 				}
 
+				/* TIME() return number of seconds since the interpreter was started */
+				/* NOTE: this requires the unix time() library. If your machine doesn't
+				 * have one, substitute your own or comment this out */
+				
+				if (strncmp(funcname,"time",4)==0) {
+					time_t tres = time(NULL);
+					fvalue = (long int)tres - BASICSTART;		// found in basic.c main()
+					goto funcend;
+				}
 
 				// not a recognized function
 				printf("Error - unknown numeric function %s\n",funcname);
@@ -508,10 +518,11 @@ funcend:		// put function result in list for later
 }
 
 
+/* ****************************** */
+/* *****     EVALSTRING()   ***** */
+/*   evaluate string expressions  */
+/* ****************************** */
 
-
-/****** EVALSTRING() *********/
-/* evaluate string expressions */
 char *evalstring(char *line) {
 
 	extern char tempCharVar[MAXLINESIZE];
@@ -760,6 +771,40 @@ evalstrLoop:
 		strncat(tempCharVar,&ch,1);
 		goto evalstrLoop;
 	}
+
+
+	/* str$() - convert numeric to string */
+	if (strncmp(temp,"str$",4)==0) {
+		line++;			// skip (
+
+		/* get all between () and eval() */
+		char TEMP[LINESIZE]={'\0'}; int n=0; int pc=0;
+		while (1) {
+			if (*line == '(') {
+				TEMP[n] = *line;
+				pc++; line++; n++;
+				continue;
+			}
+			if (*line == ')' && pc == 0) break;
+			if (*line == ')') pc--;
+			if (*line == '\n') {
+				printf("Error - early end of function str$\n");
+				error = -1;
+				return "";
+			}
+			TEMP[n++] = *line++;
+		}
+		line++;		// skip )
+		float f = eval(TEMP);
+		/* convert number to string */
+		char tmp[LINESIZE] = {'\0'};
+		sprintf(tmp,"%g",f);
+		strcat(tempCharVar,tmp);
+		goto evalstrLoop;
+	}
+
+
+		
 
 	/* --------------------------------------------- */
 
