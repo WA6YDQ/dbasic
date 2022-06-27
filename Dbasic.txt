@@ -1196,13 +1196,19 @@ Normally it returns a 0.
 
 An example of eof():
 
-10 open test.txt for input as #1
-20 input #1 a
-30 if eof(#1) = 1 then 90
-40 print a
-50 goto 20
-90 close #1
-99 end
+10 open "test.txt" for output as #1
+20 for n=1 to 10
+30 print #1, n
+40 next n
+50 close #1
+60 open "test.txt" for append as #1
+70 input #1, n
+80 if eof(#1) = 1 then 200
+90 print n
+100 goto 70
+200 close #1
+210 print "done"
+220 end
 
 
 NOTE: eof will only return 1 AFTER an INPUT statement.
@@ -1222,3 +1228,38 @@ Here is an example of a program to copy text files:
 The source file is in line 10
 The destination file is line 20
 Note the quotes around the filenames to preserve case.
+
+
+
+--- STR$() ---
+
+The function str$() returns a string of the numeric value 
+between (). All numbers and functions between () are evaluated
+before assigning the string.
+
+Example:
+5 rem example of str$
+10 let n=123*456/789
+20 print "res=";
+30 let a$=str$(n)
+40 print a$
+99 end
+Ready.
+run
+res=71.0875
+Ready.
+
+
+
+--- TIME() ---
+
+Return the number of seconds since the dbasic interpreter
+was started. Useful for time loop:
+
+5 rem sleep 1 seconds, print hi!, repeat
+10 let t=time()
+20 if t+1 > time() then 20
+30 print "hi! ",t
+40 goto 10
+
+
