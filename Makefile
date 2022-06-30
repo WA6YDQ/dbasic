@@ -11,6 +11,9 @@ clean:
 install:
 	cp dbasic /usr/local/bin/dbasic
 
+backup:
+	tar cf dbasic.tar *.c *.h Makefile *.txt examples/*
+
 LIBS = -lm
 CC = gcc
 FLAGS = -Wall -pedantic

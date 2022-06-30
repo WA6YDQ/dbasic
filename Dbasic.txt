@@ -371,6 +371,11 @@ in future releases of dbasic.
 
 --- IF/THEN ---
 
+The IF/THEN statements test both numeric and string 
+expressions:
+
+-- NUMERIC EXPRESSIONS --
+
 5 rem this program will stop at line 40
 10 let a=5
 20 if a=10 then 100
@@ -412,6 +417,26 @@ Keep the test characters together if more than 1:
 
 The keywords if/then must have a surrounding space.
 (Actually all keywords need a surrounding space).
+
+-- STRING EXPRESSIONS --
+
+If a$="abc" and b$="abc" then a$=b$ because both contain the
+same strings abc.
+
+If a$="abb" and b$="abc" then, with a string comparison, b$>a$,
+a$<b$ and a$ is not equal (!= or <>) to b$.
+
+All string comparisons follow these rules.
+
+10 input "enter name",n$
+20 if n$ = "fred" then 100
+30 print "not a match"
+40 end
+100 print "match"
+110 end
+
+Note that comparisons between strings and numbers is not allowed.
+
 
 
 

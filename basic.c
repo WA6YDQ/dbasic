@@ -29,11 +29,15 @@
  All keywords, variables are in lower case.
  Case is preserved when between double quotes ""
 
+ Please see the file Dbasic.txt in this repository
+ for details on use, example programs, etc.
+
+
  TODO: 
  keywords:
  string functions: 
- math functions: 
- misc functions: NOT(), TAB()
+ math functions: matrix math,
+ misc functions: NOT(), TAB(), AND(), OR()
 
 
 	To build this:
@@ -42,6 +46,8 @@
 	sudo make install
 	binary 'dbasic' will be installed in /usr/local/bin
 
+	To start basic, type 'dbasic'.
+	Type 'exit' or 'quit' to exit basic.
 
 */
 
@@ -112,7 +118,14 @@ int let(char *);
 int fileopen(char *);
 int fileclose(char *);
 int filerewind(char *);
+int version(void);
 
+/**** VERSION() *****/
+int version(void) {		// show version
+	printf("\ndbasic version %s\n",VERSION);
+	printf("(C) 2022 Kurt Theis <theis.kurt@gmail.com>\n");
+	return 0;
+}
 
 /***** RUN_CLEAR ******/
 /* set all vars to 0 when program starts */
@@ -216,6 +229,10 @@ int parse(char *line) {
 	int res = 0;
 	char linenum[LNSIZE],word[LINESIZE], word2[LINESIZE],word3[LINESIZE];
 	sscanf(line,"%s %s",linenum,word);	// get line number and 1st command
+
+	if (strcmp(word,"ver")==0) {		// show version
+		return version();
+	}
 
 	if (strcmp(word,"rem")==0) {		// ignore this line
 		return 0;
@@ -508,7 +525,14 @@ runloop:
 		printf("%d Bytes Free\nReady.\n",BUFSIZE-pos);
 		goto runloop;
 	}
-	
+
+	if (strncmp(line,"ver",3)==0) {
+		version();
+		printf("Ready.\n");
+		goto runloop;
+	}
+
+
 	// not a command,
 	// replace, delete or save the entered line
 	if (line[0] == '\n') goto runloop;		// ignore empty lines
