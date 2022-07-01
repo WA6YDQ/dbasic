@@ -1,10 +1,12 @@
 /* ifthen.c - if (expression) =, !=, <, > (expression) then [line number] */
 /* test 2 values - if they match the text chars, return a line number
  * else return 0 (failed test)
+ * 
+ * This tests both numeric and string expressions
+ * 
+ * part of dbasic
  *
- *  part of dbasic
- *
- *  (C) k theis <theis.kurt@gmail.com> 2022
+ * (C) k theis <theis.kurt@gmail.com> 2022
  *
  */
 
@@ -24,11 +26,15 @@ int isoperand(char ch) {
 int run_ifthen(char *line) {
 
 	float eval(char *);
+	char *evalstring(char *);
 	float lvalue=0, rvalue=0, linenum=0;
 	int n=0;
 	char expr[LINESIZE] = {'\0'};					// expression for eval()
 	int isoperand(char);
 	extern int error;
+	int STRFLAG1=0, STRFLAG2=0;						// set if $ found in expression
+	char leftchar[LINESIZE] = {'\0'};
+	char rightchar[LINESIZE] = {'\0'};
 
 	// debug
 	// printf("line is [%s]\n",line);
@@ -39,15 +45,18 @@ int run_ifthen(char *line) {
 	while (!isalpha(*line)) line++;		// skip spaces until 1st variable
 
 	/* get 1st value for tests */
-	memset(expr,0,sizeof(expr)); n = 0;
+	memset(expr,0,sizeof(expr)); n = 0; int pc=0;
 	while (1) {
-		if (isblank(*line)) break;
-		if (isoperand(*line)) break;
+		if (isblank(*line) && pc==0) break;
+		if (isoperand(*line) && pc==0) break;
 		if (*line == '\0' || *line == '\n') {
 			printf("Error - missing expression in IF statement\n");
 			return -1;
 		}
-		expr[n] = *line;
+		if (*line == '(') pc++;
+		if (*line == ')') pc--;
+		if (*line == '$' || *line == '"') STRFLAG1=1;
+		expr[n] = *line;		// ignore "" for chars
 		n++; line++;
 		if (n >= LINESIZE) {					// expression too long
 			printf("Error - expression too long in IF\n");
@@ -55,8 +64,14 @@ int run_ifthen(char *line) {
 		}
 	}
 
-	lvalue = eval(expr);
-	if (error == -1) return error;
+	if (pc != 0) {
+		printf("Error - mismatched () in IF/THEN\n");
+		return -1;
+	}
+
+	if (!STRFLAG1) lvalue = eval(expr);		// numeric expression
+	if (STRFLAG1) strcpy(leftchar,evalstring(expr));			// string expression
+	if (error == -1) return error;				// test eval()
 
 	/* get test variable */
 	int testchar = 0;
@@ -95,10 +110,17 @@ int run_ifthen(char *line) {
 
 	/* get 2nd value for tests */
 	if (isblank(*line)) while (isblank(*line)) line++;	// skip spaces
-	memset(expr,0,sizeof(expr)); n=0;
+	memset(expr,0,sizeof(expr)); n=0; pc=0;
 	while (1) {
-		if (isblank(*line)) break;
-		expr[n] = *line;
+		if (isblank(*line) && pc==0) break;
+		if (*line == '$' || *line == '"') STRFLAG2=1;			// is a string 
+		if (*line == '(') pc++;
+		if (*line == ')') pc--;
+		if (*line == '\0' || *line == '\n') {
+			printf("Error - bad value in IF/THEN\n");
+			return -1;
+		}
+		expr[n] = *line;		// ignore "" for strings
 		n++; line++;
 		if (n >= LINESIZE) {					// expression too long
 			printf("Error - expression too long\n");
@@ -106,7 +128,8 @@ int run_ifthen(char *line) {
 		}
 	}
 
-	rvalue = eval(expr);
+	if (!STRFLAG2) rvalue = eval(expr);			// numeric expression
+	if (STRFLAG2) strcpy(rightchar,evalstring(expr));			// string expression
 	if (error == -1) return error;
 
 	/* get THEN statement */
@@ -134,7 +157,27 @@ int run_ifthen(char *line) {
 	}
 	linenum = eval(expr);
 
-	/* run test betweek values */
+
+	/* test if both expressions are strings */
+	if ((STRFLAG1 == STRFLAG2) && STRFLAG1) {		// this is a string test
+		int strres = strcmp(leftchar,rightchar);
+		if (testchar == 5 && strres == 0) return linenum;	// 1st = 2nd
+		if (testchar == 1 && strres == -1) return linenum;	// 1st < 2nd
+		if (testchar == 2 && (strres==-1 || strres==1)) return linenum;	// 1st <= 2nd
+		if (testchar == 3 && (strres == 1)) return linenum;		// 1st < 2nd
+		if (testchar == 4 && (strres==0 || strres==1)) return linenum;	// 1st <= 2nd
+		if (testchar >= 6 && (strres != 0)) return linenum;		// 1st != 2nd
+		return 0;
+	}
+
+	/* test unequal expressions (string/numeric) */
+	if (STRFLAG1 != STRFLAG2) {
+		printf("Error - string to numeric expression test in IF/THEN\n");
+		return -1;
+	}
+
+
+	/* test numeric expressions */
 	if (testchar == 1) 			// less than
 		if (lvalue < rvalue) return linenum;
 	if (testchar == 2) 			// less than or equal
