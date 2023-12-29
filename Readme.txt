@@ -1,3 +1,18 @@
+UPDATE 12/2023:
+When I wrote this, my documentation consisted of the original Dartmouth BASIC.
+This is based on that.
+
+However - the newer documentation shows a much enhanced BASIC interpreter.
+This program is the original version. Sadly, it's missing a lot of the 
+newer features (matrix math, larger variables, etc).
+
+If you're looking for a version that most people are used to then
+this isn't what your looking for. As I have time, I'll update this
+to match the newer specs. 
+
+---------------------------------------------------------------------
+
+
 This is the readme for dbasic - an implimentation of Dartmouth BASIC.
 This is licensed under the MIT license. This compiles cleanly
 and runs error free in valgrind.
