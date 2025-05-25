@@ -21,6 +21,12 @@ To build, type 'make'
 To install, type sudo make install
 The binary 'dbasic' will be installed in /usr/local/bin
 
+Note: I found some distributions with c libraries that
+are not compatible with the libc released in major linux distros. 
+These libraries seems to be built for specialized processors or specific 
+applications. If you can't build this program, or if you get random
+crashes or errors, see if your library comforms to the current version of libc.
+
 Statements in this version of BASIC:
  REM, PRINT, LET, GOTO, GOSUB, RETURN, END, 
  IF/THEN, FOR/NEXT/STEP, INPUT, READ, DATA,
